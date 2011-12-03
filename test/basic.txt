@@ -1,0 +1,12 @@
+status: draft #draft, private, public
+uri: /2011/12/03/test
+uid: #something along tag:la-grange.net,2000-04-12:karl
+prev: #uid previous post
+from: Karl Dubost <karl@la-grange.net>
+created:  2011-12-03T13:01:38
+updated:  2011-12-03T13:01:38
+tz: EST
+subject: billet à propos de 森
+
+Un billet très simple.
+
