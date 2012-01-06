@@ -23,13 +23,22 @@ def main():
     # Parsing the cli
     parser = OptionParser()
     parser.add_option("-f", "--file", 
-                      action="store", type="string", 
-                      dest="source", metavar="SOURCE", 
-                      help="The raw blog post to process")
+                    action="store", type="string", 
+                    dest="source", metavar="SOURCE", 
+                    help="the raw blog post to process")
     parser.add_option("-o", "--output", 
-                      action="store", type="string", 
-                      dest="destination", metavar="DESTINATION", 
-                      help="The blog post ready to be sync")
+                    action="store", type="string", 
+                    dest="destination", metavar="DESTINATION", 
+                    help="the blog post ready to be sync")
+    parser.add_option("--atom", 
+                    action="store_true",
+                    dest="createfeed",
+                    help="create an atom feed. DEFAULT")
+    parser.add_option("--noatom", 
+                    action="store_false",
+                    dest="createfeed",
+                    help="do not create the atom feed.")
+    parser.set_defaults(createfeed=True)
     (options, args) = parser.parse_args()
 
 if __name__ == "__main__":
