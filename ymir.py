@@ -21,11 +21,8 @@ La Grange http://www.la-grange.net/.
 def main():
 
     # Parsing the cli
-    parser = OptionParser()
-    parser.add_option("-f", "--file", 
-                    action="store", type="string", 
-                    dest="source", metavar="SOURCE", 
-                    help="the raw blog post to process")
+    usage = "usage: %prog [options] raw_blog_post"
+    parser = OptionParser(usage=usage)
     parser.add_option("-o", "--output", 
                     action="store", type="string", 
                     dest="destination", metavar="DESTINATION", 
@@ -40,6 +37,8 @@ def main():
                     help="do not create the atom feed.")
     parser.set_defaults(createfeed=True)
     (options, args) = parser.parse_args()
-
+    if len(args) != 1:
+        parser.error("incorrect number of arguments. Just enter the raw blog post to process.")
+            
 if __name__ == "__main__":
     sys.exit(main())
