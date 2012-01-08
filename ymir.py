@@ -11,6 +11,23 @@ import sys
 from optparse import OptionParser
 from lxml.html import html5parser
 
+# CONFIG 
+SITENAME = "Les carnets Web de La Grange"
+SITE = "http://www.la-grange.net/"
+STATUSLIST = ['draft','pub','acl']
+LICENSELIST = {'ccby': 'http://creativecommons.org/licenses/by/2.0/fr/', 
+               'copy': '©'}
+AUTHOR = "Karl Dubost"
+AUTHORURL = "http://www.la-grange.net/karl/"
+FEEDIDTAG = "tag:la-grange.net,2000-04-12:karl"
+FEEDATOMNOM = "feed.atom"
+
+# CONFIG with cli (TODO)
+STYLESHEET = "/2011/12/01/proto/style/article.css"
+STATUS = "draft"
+MAXFEEDITEM = 20
+LICENSE = "ccby"
+
 help_message = '''
 This script has been entirely created 
 for processing text files for the site 
@@ -30,6 +47,7 @@ def parserawpost(rawpostpath):
         print "html5 doctype"
     else:
         print "no html5 doctype"
+
 def main():
 
     # Parsing the cli
