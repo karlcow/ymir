@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <!-- <title>Prototype for new design</title> -->
+<body>
+
+<h1>Un nouveau design ajusté pour La Grange <span lang="ja">森野</span></h1>
+<p class="datepub">2012-01-08</p>
+<p class="dateupd">2012-01-09</p>
+
+<figure>
+    <img src="/2011/11/25/0201-risques" alt="panneau sur un mur"/>
+    <figcaption>Montréal, Canada, 25 novembre 2011</figcaption>
+</figure>
+
+<!-- A TRAVAILLER -->
+<div class="extrait">
+    <blockquote cite="urn:isbn:12345679087">
+    <p>La seule liberté digne de ce nom est celle de travailler à notre propre bien de la manière qui nous est propre, pour autant que nous ne cherchions pas à en priver les autres ou à leur faire obstacle dans leurs efforts pour l’obtenir.</p></blockquote>
+    <p class="source"><span class="auteur">John Stuart Mill</span>, <cite class="titre">De la liberté</cite></p>
+</div>    
+
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+<p><strong>strong text</strong> or <em>emphasized text</em> dolor sit amet, consectetur <kbd>keyboard input</kbd>, sed do eiusmod tempor incididunt ut labore et dolore <abbr title="United Nations">UN</abbr>. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.</p>
+
+<p class="note">Une simple note : Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. </p>
+
+<h2 id="fooh2">Un sous-titre</h2>
+
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation <span class="note">ullamco laboris nisi ut aliquip</span> ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint <a href="http://www.un.org/">occaecat cupidatat non proident</a>, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+<h3 id="code">Un sous-titre 3</h3>
+<h4 id="code4">Un sous-titre 4</h4>
+<h5 id="code5">Un sous-titre 5</h5>
+<h6 id="code6">Un sous-titre 6</h6>
+
+<pre><code>
+import httplib2
+import BeautifulSoup as BS
+import time
+import os
+
+h = httplib2.Http(".cache")
+domain = "http://www.example.org/"
+filesystem = "/Some/path/example.org/"
+f = open("example-urls.txt", "r")
+urllist = f.readlines()
+f.close()
+</code></pre>
+
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+<table>
+    <caption>table title and/or explanatory text</caption>
+    <thead>
+        <tr>
+            <th>header</th><th>header</th><th>header</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>data</td><td>data</td><td>data</td></tr>
+        <tr><td>data</td><td>data</td><td>data</td></tr>
+        <tr><td>data</td><td>data</td><td>data</td></tr>
+        <tr><td>data</td><td>data</td><td>data</td></tr>
+    </tbody>
+</table>
+
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+</article>
+
+
+<footer> 
+<address id="signature">Ce texte est publié par <span id="auteur"><a href="/karl/">Karl</a></span> sous un <a rel="license" href="http://creativecommons.org/licenses/by/2.0/fr/">contrat Creative Commons</a>. <a id="glicense" rel="license" href="http://creativecommons.org/licenses/by/2.0/fr/"><img alt="Creative Commons License" style="padding:0 1em;margin-bottom:7px;border-width:0" src="/2011/09/30/style/80x15-by" /></a></address>
+
+</footer>
+
+</body>
+</html>
