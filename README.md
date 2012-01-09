@@ -8,6 +8,11 @@ The script must be able to reprocess an already publish file. I should not be de
 
 These are the elements I need to add to the final file before publishing it.
 
+### Check the status
+
+    if document is status draft then DRAFT is True.
+    <meta name="status" content="draft">
+
 ### UTF-8 only
 
 The script is for the future but could be practical to process old files.
