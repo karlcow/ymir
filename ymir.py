@@ -9,7 +9,8 @@ Copyright (c) 2011 Grange. All rights reserved.
 
 import sys
 from optparse import OptionParser
-from lxml.html import html5parser
+from lxml.html import tostring, html5parser
+from lxml import etree
 
 # CONFIG 
 SITENAME = "Les carnets Web de La Grange"
@@ -24,9 +25,11 @@ FEEDATOMNOM = "feed.atom"
 
 # CONFIG with cli (TODO)
 STYLESHEET = "/2011/12/01/proto/style/article.css"
-STATUS = "draft"
+STATUS = ""
 MAXFEEDITEM = 20
 LICENSE = "ccby"
+
+# PATHS
 
 help_message = '''
 This script has been entirely created 
@@ -40,13 +43,23 @@ def isDocHtml5(doctype):
     else:
         return False
 
+def status(doc):
+    """Check the publication status of the document"""
+    for meta in doc.xpath(".//meta"):
+        print meta
+        
+        # if meta.attrib.has_key('name') and meta.attrib['name'] == 'status':
+        #     status = meta.attrib['content']
+        #     return status
+    
 def parserawpost(rawpostpath):
     doc = html5parser.parse(rawpostpath)
-    doctype = doc.docinfo.doctype
-    if isDocHtml5(doctype): 
-        print "html5 doctype"
-    else:
-        print "no html5 doctype"
+    # doctype = doc.docinfo.doctype
+    # if isDocHtml5(doctype): 
+    #     print "html5 doctype"
+    # else:
+    #     print "no html5 doctype"
+    return doc
 
 def main():
 
@@ -70,9 +83,12 @@ def main():
     if len(args) != 1:
         parser.error("incorrect number of arguments. Just enter the raw blog post to process.")
     rawpostpath = args[0]
-    print rawpostpath
-    parserawpost(rawpostpath)
-
+    
+    rawpost = parserawpost(rawpostpath).getroot()
+    print etree.tostring(rawpost)
+    for element in rawpost.iter("{http://www.w3.org/1999/xhtml}meta"):
+        print "%s - %s" % (element.tag, element.text)
+    status(rawpost)
     
 if __name__ == "__main__":
     sys.exit(main())
