@@ -22,6 +22,9 @@ AUTHOR = "Karl Dubost"
 AUTHORURL = "http://www.la-grange.net/karl/"
 FEEDIDTAG = "tag:la-grange.net,2000-04-12:karl"
 FEEDATOMNOM = "feed.atom"
+HTMLNS = "http://www.w3.org/1999/xhtml"
+HTML = "{%s}" % HTMLNS
+NSMAP = {None : HTMLNS}
 
 # CONFIG with cli (TODO)
 STYLESHEET = "/2011/12/01/proto/style/article.css"
@@ -86,6 +89,7 @@ def main():
     
     rawpost = parserawpost(rawpostpath).getroot()
     print etree.tostring(rawpost)
+    print meta.get("content")
     for element in rawpost.iter("{http://www.w3.org/1999/xhtml}meta"):
         print "%s - %s" % (element.tag, element.text)
     status(rawpost)
