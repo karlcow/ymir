@@ -51,14 +51,20 @@ def getdocstatus(doc):
     returns a string
     if there are multiple meta, returns the first one and issues a warning"""
     findstatus = etree.ETXPath("//{%s}meta[@name='status']" % HTMLNS)
-    if len(findstatus(doc)) > 1:
-        print "WARNING: There are more than one status. Taking the first one"
-    status = findstatus(doc)[0].attrib['content']
-    if status in STATUSLIST:
-        print "INFO: The document is a draft"
+    if len(findstatus(doc)) >= 1:
+        status = findstatus(doc)[0].attrib['content']
+        if status in STATUSLIST:
+            if len(findstatus(doc)) > 1:
+                print "WARNING: There are more than one status. Taking the first one : " + status
+            else:
+                print "INFO: The document status is " + status
+            return status
+        else: 
+            sys.exit("ERROR: No valid status for your document")            
+    if len(findstatus(doc)) == 0:
+        print "WARNING: There is no status for this document."
+        status = "undefined"
         return status
-    else: 
-        sys.exit("ERROR: No valid status for your document")
 
 def gettitle(doc):
     """return an html string being the title of the document"""
