@@ -8,12 +8,14 @@ The script must be able to reprocess an already publish file. I should not be de
 
 These are the elements I need to add to the final file before publishing it.
 
-### Check the status
+### DONE Check the status
 
     if document is status draft then DRAFT is True.
     <meta name="status" content="draft">
+    
+    getdocstatus(doc)
 
-### UTF-8 only
+### TODO  UTF-8 only
 
 The script is for the future but could be practical to process old files.
 
@@ -29,45 +31,45 @@ The script is for the future but could be practical to process old files.
             replace by <meta charset="utf-8"> if doctype html5
             replace by the appropriate meta for the doctype
 
-### Add the `head` element
+### TODO Add the `head` element
 
     if STATUS=="draft"
     then add <head>…<head>
 
-### Mobile ready unfortunately
+### TODO Mobile ready unfortunately
 
 As long as the `@viewport` rule for viewport is not ready and implemented in other browser we can't use it. `@o-viewport` only Opera for now.
 
     if STATUS=="draft"
     then <meta name="viewport" content="width=device-width">
 
-### Add the blog title to the title
+### TODO Add the blog title to the title
 
     if STATUS=="draft"
     then <title>posttitle + " - " + SITENAME</title>
 
-### Add the stylesheet STYLESHEET
+### TODO Add the stylesheet STYLESHEET
 
 The stylesheet must be locally changeable to allow specific temp style for a trip or something.
 
     if STATUS=="draft"
     then <link rel="stylesheet" href="STYLESHEET"/>
 
-### Add the name to the Web site
+### TODO Add the name to the Web site
 
     if STATUS=="draft"
     <a rel="home" class="nomSite" href="http://DOMAIN/">SITENAME</a>
 
 TODO Check the values for rel for home page 
     
-### Add the link to the archives
+### TODO Add the link to the archives
 
     if STATUS=="draft"
     <a rel="archive" class="archives" href="/map" title="Archives">Ⓐ</a>
 
 TODO Check the values for rel for archives page
 
-### header format
+### TODO header format
 
 NOT STABLE
 
@@ -93,7 +95,7 @@ In the raw blog post
     <p class="datepub">2012-01-08</p>
     <p class="dateupd">2012-01-09</p>
 
-### footer format
+### TODO footer format
 
 NOT STABLE.
 
@@ -112,7 +114,7 @@ Need to add the footer.
     src="/2011/09/30/style/80x15-by" /></a></address>
     </footer>
 
-### Article wrapping
+### TODO Article wrapping
 
 NOT STABLE. Surely needs a bit of work
 
@@ -127,3 +129,19 @@ NOT STABLE. Surely needs a bit of work
         Who and licenses
     </footer>
 
+### TODO add a logging system to know when things are wrong and where
+
+See http://www.5dollarwhitebox.org/drupal/node/56
+
+    import logging
+ 
+    log = logging.getLogger()
+    ch  = logging.StreamHandler()
+ 
+    log.addHandler(ch)
+ 
+    log.debug('this is a debug message')
+    log.info('this is an informational message')
+    log.warning('this is a warning message')
+    log.error('this is an error message')
+    log.critical('this is a critical message')
