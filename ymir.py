@@ -59,7 +59,14 @@ def getdocstatus(doc):
         return status
     else: 
         sys.exit("ERROR: No valid status for your document")
-    
+
+def gettitle(doc):
+    """return a string being the title of the document"""
+    findtitle =  etree.ETXPath("//{%s}h1" % HTMLNS)
+    if len(findtitle(doc)) == 0:
+        sys.exit("ERROR: The document has no title")
+    title = findtitle(doc)[0]
+    return etree.tostring(title, encoding=unicode)    
 
 def parserawpost(rawpostpath):
     """Given a path, parse an html file
@@ -96,6 +103,7 @@ def main():
     rawpost = parserawpost(rawpostpath)
     # Check the status
     STATUS = getdocstatus(rawpost)
+    print gettitle(rawpost)
 
 
 if __name__ == "__main__":
