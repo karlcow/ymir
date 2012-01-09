@@ -46,22 +46,27 @@ def isDocHtml5(doctype):
     else:
         return False
 
-def status(doc):
-    """Check the publication status of the document"""
-    for meta in doc.xpath(".//meta"):
-        print meta
-        
-        # if meta.attrib.has_key('name') and meta.attrib['name'] == 'status':
-        #     status = meta.attrib['content']
-        #     return status
+def getdocstatus(doc):
+    """Check the publication status of the document
+    returns a string
+    if there are multiple meta, returns the first one and issues a warning"""
+    findstatus = etree.ETXPath("//{%s}meta[@name='status']" % HTMLNS)
+    if len(findstatus(doc)) > 1:
+        print "WARNING: There are more than one status. Taking the first one"
+    status = findstatus(doc)[0].attrib['content']
+    if status in STATUSLIST:
+        print "INFO: The document is a draft"
+        return status
+    else: 
+        sys.exit("ERROR: No valid status for your document")
     
+
 def parserawpost(rawpostpath):
+    """Given a path, parse an html file
+    TODO check if the file is correct.
+    """
     doc = html5parser.parse(rawpostpath)
-    # doctype = doc.docinfo.doctype
-    # if isDocHtml5(doctype): 
-    #     print "html5 doctype"
-    # else:
-    #     print "no html5 doctype"
+    print "INFO: Document parsed"
     return doc
 
 def main():
@@ -86,14 +91,13 @@ def main():
     if len(args) != 1:
         parser.error("incorrect number of arguments. Just enter the raw blog post to process.")
     rawpostpath = args[0]
-    
-    rawpost = parserawpost(rawpostpath).getroot()
-    print etree.tostring(rawpost)
-    print meta.get("content")
-    for element in rawpost.iter("{http://www.w3.org/1999/xhtml}meta"):
-        print "%s - %s" % (element.tag, element.text)
-    status(rawpost)
-    
+
+    # Parse the document    
+    rawpost = parserawpost(rawpostpath)
+    # Check the status
+    STATUS = getdocstatus(rawpost)
+
+
 if __name__ == "__main__":
     sys.exit(main())
 
