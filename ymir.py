@@ -40,6 +40,29 @@ for processing text files for the site
 La Grange http://www.la-grange.net/.
 '''
 
+# General processing features
+
+def gettext(elem):
+   """Getting all text from inside an element 
+   http://effbot.org/zone/element-bits-and-pieces.htm
+   """
+   text = elem.text or ""
+   for e in elem:
+      text += gettext(e)
+      if e.tail:
+         text += e.tail
+   return text
+
+def parserawpost(rawpostpath):
+    """Given a path, parse an html file
+    TODO check if the file is correct.
+    """
+    doc = html5parser.parse(rawpostpath).getroot()
+    print "INFO: Document parsed"
+    return doc
+
+# Extracting information from the blog posts
+
 def getdocstatus(doc):
     """Check the publication status of the document
     returns a string
@@ -61,20 +84,16 @@ def getdocstatus(doc):
         return status
 
 def gettitle(doc):
-    """return an html string being the title of the document"""
+    """return a list of markup and text being the title of the document"""
     findtitle =  etree.ETXPath("//{%s}h1[text()]" % HTMLNS)
     if len(findtitle(doc)) == 0:
         sys.exit("ERROR: The document has no title")
     title = findtitle(doc)[0]
-    return etree.tostring(title, encoding=unicode)    
+    titlemarkup = etree.tostring(title)
+    titletext = gettext(title)
+    return titlemarkup, titletext
 
-def parserawpost(rawpostpath):
-    """Given a path, parse an html file
-    TODO check if the file is correct.
-    """
-    doc = html5parser.parse(rawpostpath).getroot()
-    print "INFO: Document parsed"
-    return doc
+# MAIN
 
 def main():
 
@@ -104,8 +123,7 @@ def main():
     # Check the status
     STATUS = getdocstatus(rawpost)
     print gettitle(rawpost)
-
-
+    
 if __name__ == "__main__":
     sys.exit(main())
 
