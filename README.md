@@ -15,6 +15,26 @@ These are the elements I need to add to the final file before publishing it.
     
     getdocstatus(doc)
 
+### TODO  extract the dates of the blog post
+
+if STATUS == "draft"
+
+    <meta name="created" content="2012-01-08">
+    <meta name="modified" content="2012-01-08">
+
+if STATUS == ["pub","acl"]
+
+    <div class="meta pubdates">
+        <span class="pubdate">
+            <span class="pubdate-msg">Publié : </span>
+            <span class="longdate">1er décembre 2011</span>
+        </span>
+        <span class="maj">
+            <span class="maj-msg">Mise à jour : </span>
+            <span class="isodate">2011-12-01</span>
+        </span>
+    </div>
+
 ### TODO  UTF-8 only
 
 The script is for the future but could be practical to process old files.
@@ -61,13 +81,22 @@ The stylesheet must be locally changeable to allow specific temp style for a tri
     <a rel="home" class="nomSite" href="http://DOMAIN/">SITENAME</a>
 
 TODO Check the values for rel for home page 
-    
+
 ### TODO Add the link to the archives
 
     if STATUS=="draft"
     <a rel="archive" class="archives" href="/map" title="Archives">Ⓐ</a>
 
-TODO Check the values for rel for archives page
+[List of values for rel attributes](http://microformats.org/wiki/existing-rel-values#formats) that I might need.
+
+* rel="copyright":  Refers to a copyright statement for the current document. (link, a)
+* rel="license":  indicates that the [referenced document] is a license for the current page. (link, a)
+* rel="start": Refers to the first document in a collection of documents. This link type tells search engines which document is considered by the author to be the starting point of the collection.
+* rel="help": could be the way I would give access to a page giving more information about the relations. (to think about it)
+* rel="home": indicates that the [referenced document] is the homepage of the site in which the current page appears. [proposal]
+* rel="author": author of the current page, link to the author page (for me /karl/)
+* rel="archive": index of archived entries
+* rel="feed": the link is a feed
 
 ### TODO header format
 
@@ -90,10 +119,14 @@ NOT STABLE
 
 In the raw blog post
 
+#### title
+
     <h1>Un nouveau design ajusté pour La Grange 
         <span lang="ja">森野</span></h1>
-    <p class="datepub">2012-01-08</p>
-    <p class="dateupd">2012-01-09</p>
+
+#### date
+
+See the date section
 
 ### TODO footer format
 
