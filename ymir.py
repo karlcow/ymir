@@ -40,12 +40,6 @@ for processing text files for the site
 La Grange http://www.la-grange.net/.
 '''
 
-def isDocHtml5(doctype):
-    if doctype == "<!DOCTYPE html>":
-        return True
-    else:
-        return False
-
 def getdocstatus(doc):
     """Check the publication status of the document
     returns a string
