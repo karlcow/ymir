@@ -35,6 +35,8 @@ if STATUS == ["pub","acl"]
         </span>
     </div>
 
+TODO: to test if the date is in a good format
+
 ### TODO  UTF-8 only
 
 The script is for the future but could be practical to process old files.
