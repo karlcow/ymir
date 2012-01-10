@@ -16,6 +16,7 @@ from lxml import etree
 SITENAME = "Les carnets Web de La Grange"
 SITE = "http://www.la-grange.net/"
 STATUSLIST = ['draft','pub','acl']
+DATETYPELIST = ['created','modified']
 LICENSELIST = {'ccby': 'http://creativecommons.org/licenses/by/2.0/fr/', 
                'copy': '©'}
 AUTHOR = "Karl Dubost"
@@ -83,6 +84,31 @@ def getdocstatus(doc):
         status = "undefined"
         return status
 
+def getdocdate(doc, STATUS, DATETYPE):
+    """return the creation date of the document in ISO format YYYY-MM-DD
+    Input the document, status, typeofdate in between created and modified"""
+    if DATETYPE not in DATETYPELIST:
+        sys.exit("ERROR: No valid type for the date: " + DATETYPE)            
+    if STATUS == "draft":
+        finddate = etree.ETXPath("//{%s}meta[@name=%r]" % (HTMLNS,DATETYPE))
+        date = finddate(doc)[0].attrib['content']
+    else:
+        finddate = etree.ETXPath("string(//{%s}span[@class=%r])" % (HTMLNS,DATETYPE))
+        # TODO: when the date has a long format I have to convert it to ISO
+        date = finddate(doc)
+    # TODO: check if the format is correct aka YYYY-MM-DD
+    if len(finddate(doc)) >= 1:
+        if len(finddate(doc)) > 1:
+            print "WARNING: There is more than one date. Taking the first one : " + date
+        else:
+            print "INFO: The date is " + date
+        return date
+    elif len(finddate(doc)) == 0:
+        print "WARNING: There is no date."
+        date = "undefined"
+        return date
+
+
 def gettitle(doc):
     """return a list of markup and text being the title of the document"""
     findtitle =  etree.ETXPath("//{%s}h1[text()]" % HTMLNS)
@@ -123,6 +149,9 @@ def main():
     # Check the status
     STATUS = getdocstatus(rawpost)
     print gettitle(rawpost)
+    print getdocdate(rawpost, STATUS, 'created')
+    print getdocdate(rawpost, STATUS, 'modified')
+    print getdocdate(rawpost, STATUS, 'foobar')
     
 if __name__ == "__main__":
     sys.exit(main())
