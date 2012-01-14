@@ -88,27 +88,24 @@ def getdocstatus(doc):
 def getdocdate(doc, STATUS, DATETYPE):
     """return the creation date of the document in ISO format YYYY-MM-DD
     Input the document, status, typeofdate in between created and modified"""
+    # TODO: check if the format is correct aka YYYY-MM-DD
     if DATETYPE not in DATETYPELIST:
         sys.exit("ERROR: No valid type for the date: " + DATETYPE)            
     if STATUS == "draft":
         finddate = etree.ETXPath("//{%s}meta[@name=%r]" % (HTMLNS,DATETYPE))
-        date = finddate(doc)[0].attrib['content']
-    else:
-        finddate = etree.ETXPath("string(//{%s}span[@class=%r])" % (HTMLNS,DATETYPE))
-        # TODO: when the date has a long format I have to convert it to ISO
-        date = finddate(doc)
-    # TODO: check if the format is correct aka YYYY-MM-DD
-    if len(finddate(doc)) >= 1:
-        if len(finddate(doc)) > 1:
-            print "WARNING: There is more than one date. Taking the first one : " + date
-        else:
+        datelist = finddate(doc)
+        date = datelist[0].attrib['content']
+        if len(datelist) == 1:
             print "INFO: The date is " + date
-        return date
-    elif len(finddate(doc)) == 0:
-        print "WARNING: There is no date."
-        date = "undefined"
-        return date
-
+        elif len(datelist) > 1:
+            print "WARNING: There is more than one date. Taking the first one : " + date
+        elif len(datelist) == 0:
+            print "WARNING: There is no date."
+            date = "undefined"
+    else:
+        finddate = etree.ETXPath("string(//{%s}time[@class=%r]/@datetime)" % (HTMLNS,DATETYPE))
+        date = finddate(doc)
+    return date
 
 def gettitle(doc):
     """return a list of markup and text being the title of the document"""
@@ -149,10 +146,9 @@ def main():
     rawpost = parserawpost(rawpostpath)
     # Check the status
     STATUS = getdocstatus(rawpost)
-    print gettitle(rawpost)
-    print getdocdate(rawpost, STATUS, 'created')
-    print getdocdate(rawpost, STATUS, 'modified')
-    print getdocdate(rawpost, STATUS, 'foobar')
+    print "TITLE: ", gettitle(rawpost)
+    print "CREATED: ", getdocdate(rawpost, STATUS, 'created')
+    print "MODIFIED", getdocdate(rawpost, STATUS, 'modified')
     
 if __name__ == "__main__":
     sys.exit(main())
