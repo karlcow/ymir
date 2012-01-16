@@ -18,7 +18,7 @@ SITE = "http://www.la-grange.net/"
 STATUSLIST = ['draft','pub','acl']
 DATETYPELIST = ['created','modified']
 LICENSELIST = {'ccby': 'http://creativecommons.org/licenses/by/2.0/fr/', 
-               'copy': '©'}
+               'copy': u'©'}
 AUTHOR = "Karl Dubost"
 AUTHORURL = "http://www.la-grange.net/karl/"
 FEEDIDTAG = "tag:la-grange.net,2000-04-12:karl"
