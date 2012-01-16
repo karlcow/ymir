@@ -8,7 +8,7 @@ Copyright (c) 2011 Grange. All rights reserved.
 """
 
 import sys
-from optparse import OptionParser
+import argparse
 from lxml.html import tostring, html5parser
 from lxml import etree
 
@@ -122,25 +122,16 @@ def gettitle(doc):
 def main():
 
     # Parsing the cli
-    usage = "usage: %prog [options] raw_blog_post"
-    parser = OptionParser(usage=usage)
-    parser.add_option("-o", "--output", 
-                    action="store", type="string", 
-                    dest="destination", metavar="DESTINATION", 
-                    help="the blog post ready to be sync")
-    parser.add_option("--atom", 
-                    action="store_true",
-                    dest="createfeed",
-                    help="create an atom feed. DEFAULT")
-    parser.add_option("--noatom", 
-                    action="store_false",
-                    dest="createfeed",
-                    help="do not create the atom feed.")
-    parser.set_defaults(createfeed=True)
-    (options, args) = parser.parse_args()
-    if len(args) != 1:
-        parser.error("incorrect number of arguments. Just enter the raw blog post to process.")
-    rawpostpath = args[0]
+    parser = argparse.ArgumentParser(description="Managing Web site blog posts")
+
+    parser.add_argument('rawpost', metavar='FILE', help='file to be processed', action='store', nargs=1, type=argparse.FileType('rt'))
+    parser.add_argument('-o', '--output', help='the blog post ready to be sync', nargs=1, dest="output", type=argparse.FileType('wt'))
+    atomgroup = parser.add_mutually_exclusive_group()
+    atomgroup.add_argument('--atom', help='create an atom feed. DEFAULT', action='store_true', dest="createfeed", default=True)
+    atomgroup.add_argument('--noatom', help='do not create the atom feed', action='store_false', dest='createfeed', default=False)
+
+    args = parser.parse_args()
+    rawpostpath = args.rawpost[0]
 
     # Parse the document    
     rawpost = parserawpost(rawpostpath)
