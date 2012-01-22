@@ -17,25 +17,25 @@ These are the elements I need to add to the final file before publishing it.
 
 ### TODO  extract the dates of the blog post
 
-if STATUS == "draft"
+It doesn't make to have two different of writing the dates for raw and published. I have normalized.
 
-    <meta name="created" content="2012-01-08">
-    <meta name="modified" content="2012-01-08">
+if STATUS == "draft", the created datetime is:
+
+            <time datetime="2012-01-20"></time>
 
 if STATUS == ["pub","acl"]
 
     <div class="meta pubdates">
         <span class="pubdate">
             <span class="pubdate-msg">Publié : </span>
-            <span class="created longdate">1er décembre 2011</span>
+            <time class="created" datetime="2012-01-20">20 janvier 2012</time>
         </span>
         <span class="maj">
             <span class="maj-msg">Mise à jour : </span>
-            <span class="modified iso">2011-12-01</span>
+            <time class="modified" datetime="2012-01-21">2012-01-21</time>
         </span>
     </div>
 
-TODO: to test if the date is in a good format
 
 ### TODO  UTF-8 only
 
