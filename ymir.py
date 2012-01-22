@@ -85,26 +85,14 @@ def getdocstatus(doc):
         status = "undefined"
         return status
 
-def getdocdate(doc, STATUS, DATETYPE):
+def getdocdate(doc, DATETYPE):
     """return the creation date of the document in ISO format YYYY-MM-DD
-    Input the document, status, typeofdate in between created and modified"""
+    Input the document, typeofdate in between created and modified"""
     # TODO: check if the format is correct aka YYYY-MM-DD
     if DATETYPE not in DATETYPELIST:
         sys.exit("ERROR: No valid type for the date: " + DATETYPE)            
-    if STATUS == "draft":
-        finddate = etree.ETXPath("//{%s}meta[@name=%r]" % (HTMLNS,DATETYPE))
-        datelist = finddate(doc)
-        date = datelist[0].attrib['content']
-        if len(datelist) == 1:
-            print "INFO: The date is " + date
-        elif len(datelist) > 1:
-            print "WARNING: There is more than one date. Taking the first one : " + date
-        elif len(datelist) == 0:
-            print "WARNING: There is no date."
-            date = "undefined"
-    else:
-        finddate = etree.ETXPath("string(//{%s}time[@class=%r]/@datetime)" % (HTMLNS,DATETYPE))
-        date = finddate(doc)
+    finddate = etree.ETXPath("string(//{%s}time[@class=%r]/@datetime)" % (HTMLNS,DATETYPE))
+    date = finddate(doc)
     return date
 
 def gettitle(doc):
@@ -138,8 +126,8 @@ def main():
     # Check the status
     STATUS = getdocstatus(rawpost)
     print "TITLE: ", gettitle(rawpost)
-    print "CREATED: ", getdocdate(rawpost, STATUS, 'created')
-    print "MODIFIED", getdocdate(rawpost, STATUS, 'modified')
+    print "CREATED:  ", getdocdate(rawpost, 'created')
+    print "MODIFIED: ", getdocdate(rawpost, 'modified')
     
 if __name__ == "__main__":
     sys.exit(main())
