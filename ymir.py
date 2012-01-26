@@ -101,6 +101,40 @@ def gettitle(doc):
     titletext = etree.tostring(title,encoding="utf-8",method="text")
     return titlemarkup, titletext
 
+def makeblogpost(doc):
+    """create a blog post ready to be publish from a raw or already published document"""
+    pass
+    
+def makefeedentry(doc):
+    """create an individual Atom feed entry from a ready to be publish post"""
+    pass
+
+def updatefeed(feedentry):
+    """Update the feed with the last individual feed entry"""
+    pass
+
+def updateannualindex(feedentry):
+    """update the HTML Annual index with the feedendry"""
+    pass
+
+def updatemonthlyindex(feedentry):
+    """update the HTML Monthly index with the feedendry"""
+    pass
+
+def updatearchivemap():
+    """update the archive map page for new months and/or new years.
+    not sure it is necessary. Manually is kind of cool with less 
+    dependencies."""
+    pass
+
+def createmonthlyindex(month):
+    """create a monthly index when it doesn't exist"""
+    pass
+
+def createannualindex(year):
+    """create an annual index when it doesn't exist"""
+    pass
+
 # MAIN
 
 def main():
@@ -119,6 +153,7 @@ def main():
 
     # Parse the document    
     rawpost = parserawpost(rawpostpath)
+    print etree.tostring(rawpost)
     # Check the status
     STATUS = getdocstatus(rawpost)
     titlemarkup, title = gettitle(rawpost)
