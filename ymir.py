@@ -43,17 +43,6 @@ La Grange http://www.la-grange.net/.
 
 # General processing features
 
-def gettext(elem):
-   """Getting all text from inside an element 
-   http://effbot.org/zone/element-bits-and-pieces.htm
-   """
-   text = elem.text or ""
-   for e in elem:
-      text += gettext(e)
-      if e.tail:
-         text += e.tail
-   return text
-
 def parserawpost(rawpostpath):
     """Given a path, parse an html file
     TODO check if the file is correct.
@@ -95,14 +84,21 @@ def getdocdate(doc, DATETYPE):
     date = finddate(doc)
     return date
 
+def getcontent(doc):
+    """return the full content of an article"""
+    findcontent = etree.ETXPath("//{%s}article" % HTMLNS)
+    content = findcontent(doc)
+    return etree.tostring(content[0], method="html",encoding="utf-8")
+
+
 def gettitle(doc):
     """return a list of markup and text being the title of the document"""
     findtitle =  etree.ETXPath("//{%s}h1[text()]" % HTMLNS)
     if len(findtitle(doc)) == 0:
         sys.exit("ERROR: The document has no title")
     title = findtitle(doc)[0]
-    titlemarkup = etree.tostring(title)
-    titletext = gettext(title)
+    titlemarkup = etree.tostring(title,encoding="utf-8")
+    titletext = etree.tostring(title,encoding="utf-8",method="text")
     return titlemarkup, titletext
 
 # MAIN
@@ -125,9 +121,12 @@ def main():
     rawpost = parserawpost(rawpostpath)
     # Check the status
     STATUS = getdocstatus(rawpost)
-    print "TITLE: ", gettitle(rawpost)
+    titlemarkup, title = gettitle(rawpost)
+    print "TITLE: ", title
+    print "TITLEMARKUP: ", titlemarkup
     print "CREATED:  ", getdocdate(rawpost, 'created')
     print "MODIFIED: ", getdocdate(rawpost, 'modified')
+    # print "ARTICLE:  ", getcontent(rawpost)
     
 if __name__ == "__main__":
     sys.exit(main())
