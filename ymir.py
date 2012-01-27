@@ -11,6 +11,7 @@ import sys
 import argparse
 from lxml.html import tostring, html5parser
 from lxml import etree
+from lxml.etree import Element, SubElement
 
 # CONFIG 
 SITENAME = "Les carnets Web de La Grange"
@@ -25,6 +26,7 @@ AUTHORURL = "http://www.la-grange.net/karl/"
 FEEDIDTAG = "tag:la-grange.net,2000-04-12:karl"
 FEEDATOMNOM = "feed.atom"
 HTMLNS = "http://www.w3.org/1999/xhtml"
+ATOMNS = "http://www.w3.org/2005/Atom"
 HTML = "{%s}" % HTMLNS
 NSMAP = {None : HTMLNS}
 
@@ -106,12 +108,31 @@ def makeblogpost(doc):
     """create a blog post ready to be publish from a raw or already published document"""
     pass
     
-def makefeedentry(content, url, tagid, title, created, modified):
+def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
     """create an individual Atom feed entry from a ready to be publish post"""
+    # etree.register_namespace("", ATOMNS)
+    entry = Element('entry')
+    id = SubElement(entry, 'id')
+    id.text = tagid
+    linkfeedentry = SubElement(entry, 'link')
+    linkfeedentry.attrib["rel"] = "alternate"
+    # TODO: This should be probably on a case by case.
+    linkfeedentry.attrib["type"] = "text/html"
+    linkfeedentry.attrib["href"] = url
+    title = SubElement(entry, 'title')
+    title.text = posttitle
+    published = SubElement(entry, 'published')
+    published.text = created
+    updated = SubElement(entry, 'updated')
+    updated.text = modified
+    content = SubElement(entry, 'content')
+    content.attrib["type"] = "xhtml"
+    divcontent = SubElement(content, 'div')
+    divcontent.attrib["xmlns"] = HTMLNS
+    divcontent.text = postcontent.decode("utf-8")
+    return etree.tostring(entry, pretty_print=True, encoding="utf-8")
     
-    pass
-    
-def tagid(urlpath,isodate):
+def createtagid(urlpath,isodate):
     """Create a unide tagid for a given blog post
     tag:la-grange.net,2012-01-24:2012/01/24/silence"""
     tagid = "tag:%s,%s:%s" % (DOMAIN,isodate,urlpath)
@@ -164,15 +185,18 @@ def main():
     # A few tests when developing 
     STATUS = getdocstatus(rawpost)
     titlemarkup, title = gettitle(rawpost)
+    title = title.decode("utf-8")
     print "TITLE: ", title
     print "TITLEMARKUP: ", titlemarkup
     created = getdocdate(rawpost, 'created')
     modified = getdocdate(rawpost, 'modified')
     print "CREATED:  ", created
     print "MODIFIED: ", modified
-    # print "ARTICLE:  ", getcontent(rawpost)
+    content = getcontent(rawpost)
     urlpath = "2010/12/24/foo"
-    print  tagid(urlpath,created)
+    url= "%s%s" % (SITE,urlpath)
+    tagid =  createtagid(urlpath,created)
+    print makefeedentry(url, tagid, title, created, modified, content)
     
 if __name__ == "__main__":
     sys.exit(main())
