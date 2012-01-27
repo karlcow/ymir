@@ -51,6 +51,7 @@ def parserawpost(rawpostpath):
     TODO check if the file is correct.
     """
     doc = html5parser.parse(rawpostpath).getroot()
+    #TODO find a way to send the element with only the namespace on the first element.
     print "INFO: Document parsed"
     return doc
 
@@ -91,7 +92,7 @@ def getcontent(doc):
     """return the full content of an article"""
     findcontent = etree.ETXPath("//{%s}article" % HTMLNS)
     content = findcontent(doc)
-    return etree.tostring(content[0], method="html",encoding="utf-8")
+    return content[0]
 
 
 def gettitle(doc):
@@ -110,7 +111,6 @@ def makeblogpost(doc):
     
 def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
     """create an individual Atom feed entry from a ready to be publish post"""
-    # etree.register_namespace("", ATOMNS)
     entry = Element('entry')
     id = SubElement(entry, 'id')
     id.text = tagid
@@ -127,10 +127,7 @@ def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
     updated.text = modified
     content = SubElement(entry, 'content')
     content.attrib["type"] = "xhtml"
-    divcontent = SubElement(content, 'div')
-    divcontent.attrib["xmlns"] = HTMLNS
-    print postcontent
-    divcontent.text = postcontent.decode("utf-8")
+    content.append(postcontent)
     return etree.tostring(entry, pretty_print=True, encoding="utf-8")
     
 def createtagid(urlpath,isodate):
