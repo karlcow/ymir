@@ -14,7 +14,8 @@ from lxml import etree
 
 # CONFIG 
 SITENAME = "Les carnets Web de La Grange"
-SITE = "http://www.la-grange.net/"
+DOMAIN = "la-grange.net"
+SITE = "http://www.%s/" % (DOMAIN)
 STATUSLIST = ['draft','pub','acl']
 DATETYPELIST = ['created','modified']
 LICENSELIST = {'ccby': 'http://creativecommons.org/licenses/by/2.0/fr/', 
@@ -105,9 +106,16 @@ def makeblogpost(doc):
     """create a blog post ready to be publish from a raw or already published document"""
     pass
     
-def makefeedentry(doc):
+def makefeedentry(content, url, tagid, title, created, modified):
     """create an individual Atom feed entry from a ready to be publish post"""
+    
     pass
+    
+def tagid(urlpath,isodate):
+    """Create a unide tagid for a given blog post
+    tag:la-grange.net,2012-01-24:2012/01/24/silence"""
+    tagid = "tag:%s,%s:%s" % (DOMAIN,isodate,urlpath)
+    return tagid
 
 def updatefeed(feedentry):
     """Update the feed with the last individual feed entry"""
@@ -153,15 +161,18 @@ def main():
 
     # Parse the document    
     rawpost = parserawpost(rawpostpath)
-    print etree.tostring(rawpost)
-    # Check the status
+    # A few tests when developing 
     STATUS = getdocstatus(rawpost)
     titlemarkup, title = gettitle(rawpost)
     print "TITLE: ", title
     print "TITLEMARKUP: ", titlemarkup
-    print "CREATED:  ", getdocdate(rawpost, 'created')
-    print "MODIFIED: ", getdocdate(rawpost, 'modified')
+    created = getdocdate(rawpost, 'created')
+    modified = getdocdate(rawpost, 'modified')
+    print "CREATED:  ", created
+    print "MODIFIED: ", modified
     # print "ARTICLE:  ", getcontent(rawpost)
+    urlpath = "2010/12/24/foo"
+    print  tagid(urlpath,created)
     
 if __name__ == "__main__":
     sys.exit(main())
