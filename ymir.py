@@ -129,6 +129,7 @@ def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
     content.attrib["type"] = "xhtml"
     divcontent = SubElement(content, 'div')
     divcontent.attrib["xmlns"] = HTMLNS
+    print postcontent
     divcontent.text = postcontent.decode("utf-8")
     return etree.tostring(entry, pretty_print=True, encoding="utf-8")
     
