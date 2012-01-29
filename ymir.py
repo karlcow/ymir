@@ -13,20 +13,30 @@ from lxml.html import tostring, html5parser
 from lxml import etree
 from lxml.etree import Element, SubElement
 
-# CONFIG 
-SITENAME = "Les carnets Web de La Grange"
-DOMAIN = "la-grange.net"
-SITE = "http://www.%s/" % (DOMAIN)
-STATUSLIST = ['draft','pub','acl']
-DATETYPELIST = ['created','modified']
-LICENSELIST = {'ccby': 'http://creativecommons.org/licenses/by/2.0/fr/', 
-               'copy': u'©'}
-AUTHOR = "Karl Dubost"
-AUTHORURL = "http://www.la-grange.net/karl/"
-FEEDIDTAG = "tag:la-grange.net,2000-04-12:karl"
-FEEDATOMNOM = "feed.atom"
-HTMLNS = "http://www.w3.org/1999/xhtml"
-ATOMNS = "http://www.w3.org/2005/Atom"
+# CONFIG SITE
+DOMAIN = u"la-grange.net"
+SITE = u"http://www.%s/" % (DOMAIN)
+FAVICON = SITE + "favicon"
+
+
+SITENAME = u"Les carnets Web de La Grange"
+TAGLINE = u"Rêveries le long d'un brin de chèvrefeuille"
+
+FEEDTAGID = u"tag:la-grange.net,2000-04-12:karl"
+FEEDLANG = u"fr"
+FEEDATOMNOM = u"feed.atom"
+FEEDATOMURL = u"%s%s" % (SITE,FEEDATOMNOM)
+
+STATUSLIST = [u'draft',u'pub',u'acl']
+DATETYPELIST = [u'created',u'modified']
+LICENSELIST = {u'ccby': u'http://creativecommons.org/licenses/by/2.0/fr/', 
+               u'copy': u'©'}
+
+AUTHOR = u"Karl Dubost"
+AUTHORURI = u"http://www.la-grange.net/karl/"
+
+HTMLNS = u"http://www.w3.org/1999/xhtml"
+ATOMNS = u"http://www.w3.org/2005/Atom"
 HTML = "{%s}" % HTMLNS
 NSMAP = {None : HTMLNS}
 
@@ -108,6 +118,59 @@ def gettitle(doc):
 def makeblogpost(doc):
     """create a blog post ready to be publish from a raw or already published document"""
     pass
+
+def makefeedskeleton(websitetitle, tagline, feedtagid, lang, feedatomurl, site, license, faviconlink, authorname, authoruri):
+    """create the feed skeleton for a specific Web site"""
+    feed = Element('feed')
+    feed.attrib['lang'] = lang
+
+    # Web site title
+    title = SubElement(feed, 'title')
+    title.text = websitetitle
+    
+    # Tagline
+    subtitle = SubElement(feed, 'subtitle')
+    subtitle.text = tagline
+
+    # feedid
+    feedid = SubElement(feed, 'id')
+    feedid.text = feedtagid    
+
+    # updated 
+    updated = SubElement(feed, 'updated')
+
+    # link self atom
+    linkselfatom = SubElement(feed, 'link')
+    linkselfatom.attrib["rel"] = "self"
+    linkselfatom.attrib["type"] = "application/atom+xml"
+    linkselfatom.attrib["href"] = FEEDATOMURL
+
+    # link alternate blog
+    linkselfatom = SubElement(feed, 'link')
+    linkselfatom.attrib["rel"] = "alternate"
+    linkselfatom.attrib["type"] = "application/xhtml+xml"
+    linkselfatom.attrib["href"] = site
+
+    # link license
+    linkselfatom = SubElement(feed, 'link')
+    linkselfatom.attrib["rel"] = "license"
+    linkselfatom.attrib["href"] = license
+
+    # icon
+    icon = SubElement(feed, 'icon')
+    icon.text = faviconlink
+    
+    # author
+    author = SubElement(feed, 'author')
+    name = SubElement(author, 'name')
+    name.text = authorname
+    # email = SubElement(author, 'email')
+    # email.text = FEEDEMAIL
+    uri = SubElement(author, 'uri')
+    uri.text = authoruri
+    
+    return feed
+    
     
 def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
     """create an individual Atom feed entry from a ready to be publish post"""
@@ -195,6 +258,7 @@ def main():
     url= "%s%s" % (SITE,urlpath)
     tagid =  createtagid(urlpath,created)
     print makefeedentry(url, tagid, title, created, modified, content)
+    print etree.tostring(makefeedskeleton(SITENAME, TAGLINE, FEEDTAGID, FEEDLANG, FEEDATOMURL, SITE, LICENSELIST['ccby'], FAVICON, AUTHOR, AUTHORURI), encoding="utf-8",pretty_print=True)
     
 if __name__ == "__main__":
     sys.exit(main())
