@@ -39,9 +39,7 @@ HTMLNS = u"http://www.w3.org/1999/xhtml"
 ATOMNS = u"http://www.w3.org/2005/Atom"
 HTML = "{%s}" % HTMLNS
 NSMAP = {None : HTMLNS}
-NSMAP2 = {
-    None : ATOMNS,
-    "html": HTMLNS }
+NSMAP2 = {None : ATOMNS}
 
 # CONFIG with cli (TODO)
 STYLESHEET = "/2011/12/01/proto/style/article.css"
@@ -193,7 +191,11 @@ def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
     updated.text = modified
     content = SubElement(entry, 'content')
     content.attrib["type"] = "xhtml"
-    content.append(postcontent)
+    # changing the namespace to HTML 
+    # so only the local root element (div) will get the namespace
+    divcontent = SubElement(content, "{%s}div"%HTMLNS, nsmap=NSMAP)
+    # Adding a full tree fragment.
+    divcontent.append(postcontent)
     return etree.tostring(entry, pretty_print=True, encoding="utf-8")
     
 def createtagid(urlpath,isodate):
