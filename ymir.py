@@ -38,9 +38,10 @@ AUTHORURI = u"http://www.la-grange.net/karl/"
 HTMLNS = u"http://www.w3.org/1999/xhtml"
 ATOMNS = u"http://www.w3.org/2005/Atom"
 HTML = "{%s}" % HTMLNS
-NSMAP = {
-    None : HTMLNS,
-    "atom": ATOMNS }
+NSMAP = {None : HTMLNS}
+NSMAP2 = {
+    None : ATOMNS,
+    "html": HTMLNS }
 
 # CONFIG with cli (TODO)
 STYLESHEET = "/2011/12/01/proto/style/article.css"
@@ -176,7 +177,7 @@ def makefeedskeleton(websitetitle, tagline, feedtagid, lang, feedatomurl, site, 
     
 def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
     """create an individual Atom feed entry from a ready to be publish post"""
-    entry = Element('entry')
+    entry = Element('entry',nsmap=NSMAP2)
     id = SubElement(entry, 'id')
     id.text = tagid
     linkfeedentry = SubElement(entry, 'link')
