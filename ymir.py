@@ -38,7 +38,9 @@ AUTHORURI = u"http://www.la-grange.net/karl/"
 HTMLNS = u"http://www.w3.org/1999/xhtml"
 ATOMNS = u"http://www.w3.org/2005/Atom"
 HTML = "{%s}" % HTMLNS
-NSMAP = {None : HTMLNS}
+NSMAP = {
+    None : HTMLNS,
+    "atom": ATOMNS }
 
 # CONFIG with cli (TODO)
 STYLESHEET = "/2011/12/01/proto/style/article.css"
