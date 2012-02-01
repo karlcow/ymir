@@ -225,6 +225,12 @@ def updatemonthlyindex(indexmarkup, monthindexpath):
         # TODO
         print "need to create index file"
         createmonthlyindex(monthindexpath)
+    # check if the element is already in the list
+    print indexmarkup.get('href')
+    # if YES replace it with the new one.
+    # if NO add it to the end of the list?
+    # hmmm what about if the date is not in order :)
+    
 
 def createindexmarkup(postpath, created, modified, title):
     """Create the Markup necessary to update the indexes"""
