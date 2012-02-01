@@ -7,7 +7,7 @@ Created by Karl Dubost on 2011-12-03.
 Copyright (c) 2011 Grange. All rights reserved.
 """
 
-import sys
+import sys, os
 import argparse
 from lxml.html import tostring, html5parser
 from lxml import etree
@@ -38,6 +38,7 @@ AUTHORURI = u"http://www.la-grange.net/karl/"
 HTMLNS = u"http://www.w3.org/1999/xhtml"
 ATOMNS = u"http://www.w3.org/2005/Atom"
 HTML = "{%s}" % HTMLNS
+ATOM = "{%s}" % ATOMNS
 NSMAP = {None : HTMLNS}
 NSMAP2 = {None : ATOMNS}
 
@@ -196,7 +197,10 @@ def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
     divcontent = SubElement(content, "{%s}div"%HTMLNS, nsmap=NSMAP)
     # Adding a full tree fragment.
     divcontent.append(postcontent)
-    return etree.tostring(entry, pretty_print=True, encoding="utf-8")
+    linkselfatom = SubElement(entry, 'link',nsmap=NSMAP2)
+    linkselfatom.attrib["rel"] = "license"
+    linkselfatom.attrib["href"] = LICENSELIST['ccby']
+    return entry
     
 def createtagid(urlpath,isodate):
     """Create a unide tagid for a given blog post
@@ -212,9 +216,22 @@ def updateannualindex(feedentry):
     """update the HTML Annual index with the feedendry"""
     pass
 
-def updatemonthlyindex(feedentry):
-    """update the HTML Monthly index with the feedendry"""
-    pass
+
+def createindexmarkup(postpath, created, modified, title):
+    """Create the Markup necessary to update the indexes"""
+    dcreated = {'class':'created', 'datetime':created}
+    dmodified = {'class':'modified', 'datetime':modified}
+    # Creating the Markup
+    li = etree.Element('li')
+    ctime = etree.SubElement(li,'time', dcreated)
+    ctime.text = created
+    ctime.tail = u" "
+    mtime = etree.SubElement(li,'time', dmodified)
+    mtime.text = modified
+    mtime.tail = u": "
+    anchor = etree.SubElement(li, 'a', {'href':postpath})
+    anchor.text = title.strip()
+    return li
 
 def updatearchivemap():
     """update the archive map page for new months and/or new years.
@@ -222,7 +239,7 @@ def updatearchivemap():
     dependencies."""
     pass
 
-def createmonthlyindex(month):
+def createmonthlyindex(monthindexpath):
     """create a monthly index when it doesn't exist"""
     pass
 
@@ -248,6 +265,7 @@ def main():
 
     # Parse the document    
     rawpost = parserawpost(rawpostpath)
+    abspathpost = os.path.abspath(rawpostpath.name)
     # A few tests when developing 
     STATUS = getdocstatus(rawpost)
     titlemarkup, title = gettitle(rawpost)
@@ -259,11 +277,24 @@ def main():
     print "CREATED:  ", created
     print "MODIFIED: ", modified
     content = getcontent(rawpost)
-    urlpath = "2010/12/24/foo"
-    url= "%s%s" % (SITE,urlpath)
-    tagid =  createtagid(urlpath,created)
-    print makefeedentry(url, tagid, title, created, modified, content)
-    print etree.tostring(makefeedskeleton(SITENAME, TAGLINE, FEEDTAGID, FEEDLANG, FEEDATOMURL, SITE, LICENSELIST['ccby'], FAVICON, AUTHOR, AUTHORURI), encoding="utf-8",pretty_print=True)
+
+    # What are the paths?
+    monthabspath = os.path.dirname(os.path.dirname(abspathpost))
+    yearabspath = os.path.dirname(monthabspath)
+    rootabspath = os.path.dirname(yearabspath)
+    postpath = abspathpost[len(rootabspath):]
+    monthindexpath = monthabspath+"/index.html"
+    tagid =  createtagid(abspathpost,created)
+    feedentry = makefeedentry(abspathpost, tagid, title, created, modified, content)
+    indexmarkup = createindexmarkup(postpath[:-5], created, modified, title)
+
+
+    # feedbase = makefeedskeleton(SITENAME, TAGLINE, FEEDTAGID, FEEDLANG, FEEDATOMURL, SITE, LICENSELIST['ccby'], FAVICON, AUTHOR, AUTHORURI)
+    # print etree.tostring(monthlyindex, encoding="utf-8",pretty_print=True)
+    # two cases 
+    # either it is already in the list: update
+    # It is not in the list: new post
+    # check the path
     
 if __name__ == "__main__":
     sys.exit(main())
