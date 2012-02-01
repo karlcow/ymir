@@ -216,6 +216,15 @@ def updateannualindex(feedentry):
     """update the HTML Annual index with the feedendry"""
     pass
 
+def updatemonthlyindex(indexmarkup, monthindexpath):
+    """update the HTML Annual index with the feedendry"""
+    # is there a monthly index.
+    if os.path.isfile(monthindexpath):
+        monthlyindex = parserawpost(monthindexpath)
+    else:
+        # TODO
+        print "need to create index file"
+        createmonthlyindex(monthindexpath)
 
 def createindexmarkup(postpath, created, modified, title):
     """Create the Markup necessary to update the indexes"""
@@ -287,7 +296,7 @@ def main():
     tagid =  createtagid(abspathpost,created)
     feedentry = makefeedentry(abspathpost, tagid, title, created, modified, content)
     indexmarkup = createindexmarkup(postpath[:-5], created, modified, title)
-
+    updatemonthlyindex(indexmarkup, monthindexpath)
 
     # feedbase = makefeedskeleton(SITENAME, TAGLINE, FEEDTAGID, FEEDLANG, FEEDATOMURL, SITE, LICENSELIST['ccby'], FAVICON, AUTHOR, AUTHORURI)
     # print etree.tostring(monthlyindex, encoding="utf-8",pretty_print=True)
