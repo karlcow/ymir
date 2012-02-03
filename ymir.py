@@ -41,6 +41,7 @@ HTML = "{%s}" % HTMLNS
 ATOM = "{%s}" % ATOMNS
 NSMAP = {None : HTMLNS}
 NSMAP2 = {None : ATOMNS}
+NSMAP3 = {'html' : HTMLNS}
 
 # CONFIG with cli (TODO)
 STYLESHEET = "/2011/12/01/proto/style/article.css"
@@ -216,34 +217,16 @@ def updateannualindex(feedentry):
     """update the HTML Annual index with the feedendry"""
     pass
 
-def updatemonthlyindex(indexmarkup, monthindexpath):
-    """update the HTML Annual index with the feedendry"""
-    # is there a monthly index.
-    if os.path.isfile(monthindexpath):
-        monthlyindex = parserawpost(monthindexpath)
-    else:
-        # TODO
-        print "need to create index file"
-        createmonthlyindex(monthindexpath)
-    # check if the element is already in the list
-    print indexmarkup.get('href')
-    # if YES replace it with the new one.
-    # if NO add it to the end of the list?
-    # hmmm what about if the date is not in order :)
     
 
-def createindexmarkup(postpath, created, modified, title):
+def createindexmarkup(postpath, created, title):
     """Create the Markup necessary to update the indexes"""
     dcreated = {'class':'created', 'datetime':created}
-    dmodified = {'class':'modified', 'datetime':modified}
     # Creating the Markup
-    li = etree.Element('li')
+    li = etree.Element("{%s}li" % HTMLNS, nsmap=NSMAP)
     ctime = etree.SubElement(li,'time', dcreated)
-    ctime.text = created
-    ctime.tail = u" "
-    mtime = etree.SubElement(li,'time', dmodified)
-    mtime.text = modified
-    mtime.tail = u": "
+    ctime.text = created[:10]
+    ctime.tail = u" : "
     anchor = etree.SubElement(li, 'a', {'href':postpath})
     anchor.text = title.strip()
     return li
@@ -301,8 +284,10 @@ def main():
     monthindexpath = monthabspath+"/index.html"
     tagid =  createtagid(abspathpost,created)
     feedentry = makefeedentry(abspathpost, tagid, title, created, modified, content)
-    indexmarkup = createindexmarkup(postpath[:-5], created, modified, title)
-    updatemonthlyindex(indexmarkup, monthindexpath)
+    print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
+    indexmarkup = createindexmarkup(postpath[:-5], created, title)
+    print etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
+    # print updatemonthlyindex(indexmarkup, monthindexpath)
 
     # feedbase = makefeedskeleton(SITENAME, TAGLINE, FEEDTAGID, FEEDLANG, FEEDATOMURL, SITE, LICENSELIST['ccby'], FAVICON, AUTHOR, AUTHORURI)
     # print etree.tostring(monthlyindex, encoding="utf-8",pretty_print=True)
