@@ -217,6 +217,44 @@ def updateannualindex(feedentry):
     """update the HTML Annual index with the feedendry"""
     pass
 
+def updatemonthlyindex(indexmarkup, monthindexpath):
+    """update the HTML Annual index with the feedendry"""
+    print etree.tostring(indexmarkup, encoding="utf-8")
+    # is there a monthly index.
+    if os.path.isfile(monthindexpath):
+        monthlyindex = parserawpost(monthindexpath)
+    else:
+        # TODO
+        print "need to create index file"
+        createmonthlyindex(monthindexpath)
+    # grab the path and the modified date for the blog post
+    anchor = indexmarkup.xpath("/li/a")
+    newmodified = indexmarkup.xpath("/html:li/time[@class='modified']/text()", namespaces={'html':'http://www.w3.org/1999/xhtml'})[0]
+    link = anchor[0].get('href')
+    # check if the element is already in the list
+    findli = etree.ETXPath("//{%s}li/{%s}a" % (HTMLNS,HTMLNS))
+    fulllist = findli(monthlyindex)
+    ENDLIST = True
+    for item in fulllist:
+        # if yes replace it with the new one.
+        if item.get('href') == link:
+            ENDLIST = False
+            for timeelt in item.itersiblings(preceding=True):
+                if timeelt.get('class') == 'modified':
+                    timeelt.set('datetime',newmodified)
+                    timeelt.text = newmodified
+            return etree.tostring(monthlyindex, encoding="utf-8")
+            
+    if ENDLIST:
+        findul = etree.ETXPath("//{%s}ul" % HTMLNS)
+        ul = findul(monthlyindex)[0]
+        print ul
+        ul.append(indexmarkup)
+        print "Add markup at the end"
+        return etree.tostring(monthlyindex, encoding="utf-8")
+
+    # if NO add it to the end of the list?
+    # hmmm what about if the date is not in order :)
     
 
 def createindexmarkup(postpath, created, title):
