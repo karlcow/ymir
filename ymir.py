@@ -209,6 +209,35 @@ def createtagid(urlpath,isodate):
     tagid = "tag:%s,%s:%s" % (DOMAIN,isodate,urlpath)
     return tagid
 
+def nowdate(format=""):
+    """Compute date in different formats I need"""
+    # date in French please
+    my_locale = "fr_FR"
+    locale.setlocale(locale.LC_ALL, my_locale)
+    if format == "rfc3339":
+        return strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
+    elif format == "iso":
+        return strftime("%Y-%m-%d", gmtime())
+    elif format == "path":
+        return strftime("%Y/%m/%d", gmtime())
+    elif format == "humain":
+        # remove the leading 0 of the date
+        dategeek = strftime("%d %B %Y", gmtime())
+        if dategeek.startswith('0'):
+            dategeek = dategeek.lstrip('0')
+        return dategeek
+    elif format == "humainlong":
+        # Remove the leading 0
+        # And add the day of the week
+        # "Vendredi "+ "3 février 2012"
+        dategeek = strftime("%d %B %Y", localtime())
+        if dategeek.startswith('0'):
+            dategeek = dategeek.lstrip('0')
+        return strftime("%A ", localtime()) + dategeek
+    else:
+        print "wrong format"
+        sys.exit(1)
+
 def updatefeed(feedentry):
     """Update the feed with the last individual feed entry"""
     pass
