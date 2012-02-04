@@ -207,7 +207,7 @@ def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
 def createtagid(urlpath,isodate):
     """Create a unide tagid for a given blog post
     tag:la-grange.net,2012-01-24:2012/01/24/silence"""
-    tagid = "tag:%s,%s:%s" % (DOMAIN,isodate,urlpath)
+    tagid = "tag:%s,%s:%s" % (DOMAIN,isodate[:-10],urlpath.lstrip(SITE))
     return tagid
 
 def nowdate(format=""):
@@ -343,16 +343,16 @@ def main():
     print "CREATED:  ", created
     print "MODIFIED: ", modified
     content = getcontent(rawpost)
-    print nowdate('rfc3339')
 
     # What are the paths?
     monthabspath = os.path.dirname(os.path.dirname(abspathpost))
     yearabspath = os.path.dirname(monthabspath)
     rootabspath = os.path.dirname(yearabspath)
     postpath = abspathpost[len(rootabspath):]
+    posturl = "%s%s" % (SITE[:-1], postpath[:-5])
     monthindexpath = monthabspath+"/index.html"
-    tagid =  createtagid(abspathpost,created)
-    feedentry = makefeedentry(abspathpost, tagid, title, created, modified, content)
+    tagid =  createtagid(posturl,created)
+    feedentry = makefeedentry(posturl, tagid, title, created, nowdate('rfc3339'), content)
     print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
     indexmarkup = createindexmarkup(postpath[:-5], created, title)
     print etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
