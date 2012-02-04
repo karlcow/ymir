@@ -7,7 +7,8 @@ Created by Karl Dubost on 2011-12-03.
 Copyright (c) 2011 Grange. All rights reserved.
 """
 
-import sys, os
+import sys, os, locale
+from time import gmtime, strftime, localtime
 import argparse
 from lxml.html import tostring, html5parser
 from lxml import etree
@@ -342,6 +343,7 @@ def main():
     print "CREATED:  ", created
     print "MODIFIED: ", modified
     content = getcontent(rawpost)
+    print nowdate('rfc3339')
 
     # What are the paths?
     monthabspath = os.path.dirname(os.path.dirname(abspathpost))
