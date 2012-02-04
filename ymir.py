@@ -105,9 +105,12 @@ def getdocdate(doc, DATETYPE):
 def getcontent(doc):
     """return the full content of an article"""
     findcontent = etree.ETXPath("//{%s}article" % HTMLNS)
-    content = findcontent(doc)
-    return content[0]
-
+    content = findcontent(doc)[0]
+    # we want the content without the dates and the title
+    findheader = etree.ETXPath("//{%s}header" % HTMLNS)
+    header = findheader(content)[0]
+    content.remove(header)
+    return content
 
 def gettitle(doc):
     """return a list of markup and text being the title of the document"""
