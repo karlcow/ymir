@@ -15,12 +15,14 @@ import argparse
 from lxml.html import html5parser
 from lxml import etree
 from lxml.etree import Element, SubElement
+from string import Template
+
 
 # CONFIG SITE
 DOMAIN = u"la-grange.net"
 SITE = u"http://www.%s/" % (DOMAIN)
 FAVICON = SITE + "favicon"
-
+TEMPLATEDIR = os.path.dirname(sys.argv[0]) + "/templates/"
 
 SITENAME = u"Les carnets Web de La Grange"
 TAGLINE = u"Rêveries le long d'un brin de chèvrefeuille"
@@ -323,15 +325,19 @@ def updatearchivemap():
     pass
 
 
-def createmonthlyindex(monthindexpath):
+def createmonthlyindex(monthindexpath, created):
     """create a monthly index when it doesn't exist"""
+    # Code ici pour lire un fichier avec des variables
+    # substituer les variables par les valeurs du mois
+    # sauver le fichier au bon endroit
     if os.path.isfile(monthindexpath):
         pass
     else:
         print "Do not forget to update /map with your tiny hands"
-        # Code ici pour lire un fichier avec des variables
-        # substituer les variables par les valeurs du mois
-        # sauver le fichier au bon endroit
+        with open(TEMPLATEDIR + 'index-mois.html', 'r') as source:
+            t = Template(source.read())
+            result = t.substitute(isodate = created, monthname = "toto", year = "2046", isodateshort="2046-03-16", humandate = "foobar", firstentry="pointpoint")
+            print result
 
 
 def createannualindex(year):
@@ -378,7 +384,7 @@ def main():
     posturl = "%s%s" % (SITE[:-1], postpath[:-5])
     monthindexpath = monthabspath + "/index.html"
     print monthindexpath
-    createmonthlyindex(monthindexpath)
+    createmonthlyindex(monthindexpath, created)
     tagid = createtagid(posturl, created)
     feedentry = makefeedentry(posturl, tagid, title, created, nowdate('rfc3339'), content)
     #print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
