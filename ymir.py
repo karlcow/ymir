@@ -12,7 +12,7 @@ import os
 import locale
 from time import gmtime, strftime, localtime
 import argparse
-from lxml.html import tostring, html5parser
+from lxml.html import html5parser
 from lxml import etree
 from lxml.etree import Element, SubElement
 
@@ -61,6 +61,7 @@ La Grange http://www.la-grange.net/.
 
 # General processing features
 
+
 def parserawpost(rawpostpath):
     """Given a path, parse an html file
     TODO check if the file is correct.
@@ -88,7 +89,7 @@ def getdocstatus(doc):
                 print "INFO: The document status is " + status
             return status
         else:
-            raise Exception "ERROR: No valid status for your document: %s not in %s" % (status, STATUSLIST)
+            raise Exception, "ERROR: No valid status for your document: %s not in %s" % (status, STATUSLIST)
     if len(docstatus) == 0:
         print "WARNING: There is no status for this document."
         status = "undefined"
@@ -324,7 +325,13 @@ def updatearchivemap():
 
 def createmonthlyindex(monthindexpath):
     """create a monthly index when it doesn't exist"""
-    pass
+    if os.path.isfile(monthindexpath):
+        pass
+    else:
+        print "Do not forget to update /map with your tiny hands"
+        # Code ici pour lire un fichier avec des variables
+        # substituer les variables par les valeurs du mois
+        # sauver le fichier au bon endroit
 
 
 def createannualindex(year):
@@ -370,11 +377,13 @@ def main():
     postpath = abspathpost[len(rootabspath):]
     posturl = "%s%s" % (SITE[:-1], postpath[:-5])
     monthindexpath = monthabspath + "/index.html"
+    print monthindexpath
+    createmonthlyindex(monthindexpath)
     tagid = createtagid(posturl, created)
     feedentry = makefeedentry(posturl, tagid, title, created, nowdate('rfc3339'), content)
-    print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
+    #print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
     indexmarkup = createindexmarkup(postpath[:-5], created, title)
-    print etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
+    #print etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
     # print updatemonthlyindex(indexmarkup, monthindexpath)
 
     # feedbase = makefeedskeleton(SITENAME, TAGLINE, FEEDTAGID, FEEDLANG, FEEDATOMURL, SITE, LICENSELIST['ccby'], FAVICON, AUTHOR, AUTHORURI)
