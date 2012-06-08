@@ -305,6 +305,7 @@ def updatemonthlyindex(indexmarkup, monthindexpath):
     # hmmm what about if the date is not in order :)
 
 
+# NEED TO FIX THE NAMESPACE output.
 def createindexmarkup(postpath, created, title):
     """Create the Markup necessary to update the indexes"""
     dcreated = {'class': 'created', 'datetime': created}
@@ -325,7 +326,7 @@ def updatearchivemap():
     pass
 
 
-def createmonthlyindex(monthindexpath, created):
+def createmonthlyindex(monthindexpath, indexmarkup):
     """create a monthly index when it doesn't exist"""
     # Code ici pour lire un fichier avec des variables
     # substituer les variables par les valeurs du mois
@@ -336,7 +337,13 @@ def createmonthlyindex(monthindexpath, created):
         print "Do not forget to update /map with your tiny hands"
         with open(TEMPLATEDIR + 'index-mois.html', 'r') as source:
             t = Template(source.read())
-            result = t.substitute(isodate = created, monthname = "toto", year = "2046", isodateshort="2046-03-16", humandate = "foobar", firstentry="pointpoint")
+            datestring = nowdate('iso')
+            datehumain = nowdate('humain')
+            # to get month, we split in 3 the human date and take the second argument
+            datemois = datehumain.split(' ')[1]
+            indexli = etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
+            result = t.substitute(isodateshort = datestring, monthname = datemois, year = datestring[:4], humandate = datehumain, firstentry = indexli)
+            # need to write it on the filesystem.
             print result
 
 
@@ -365,7 +372,7 @@ def main():
     rawpost = parserawpost(rawpostpath)
     abspathpost = os.path.abspath(rawpostpath.name)
     # A few tests when developing
-    STATUS = getdocstatus(rawpost)
+    # STATUS = getdocstatus(rawpost)
     titlemarkup, title = gettitle(rawpost)
     title = title.decode("utf-8")
     print "TITLE: ", title
@@ -383,13 +390,19 @@ def main():
     postpath = abspathpost[len(rootabspath):]
     posturl = "%s%s" % (SITE[:-1], postpath[:-5])
     monthindexpath = monthabspath + "/index.html"
-    print monthindexpath
-    createmonthlyindex(monthindexpath, created)
+    # Create Markup for the monthly and yearly index file
+    indexmarkup = createindexmarkup(postpath[:-5], created, title)
+    print etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
+    # Create the monthly index if it doesn't exist yet
+    # Happen once a month
+    createmonthlyindex(monthindexpath, indexmarkup)
+    # Create the yearly index if it doesn't exist yet
+    # Happen once a year
+    # TODO
+    # Create Feed
     tagid = createtagid(posturl, created)
     feedentry = makefeedentry(posturl, tagid, title, created, nowdate('rfc3339'), content)
     #print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
-    indexmarkup = createindexmarkup(postpath[:-5], created, title)
-    #print etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
     # print updatemonthlyindex(indexmarkup, monthindexpath)
 
     # feedbase = makefeedskeleton(SITENAME, TAGLINE, FEEDTAGID, FEEDLANG, FEEDATOMURL, SITE, LICENSELIST['ccby'], FAVICON, AUTHOR, AUTHORURI)
