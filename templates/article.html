@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>${billettitre} - Carnets Web de La Grange</title>
+    <link rel="stylesheet" href="/2011/12/01/proto/style/article.css"/>
+</head>
+<body>
+<a class="nomSite" href="http://www.la-grange.net/">Les carnets Web de La Grange</a>
+<a class="archives" href="/map" title="Archives">Ⓐ</a>
+
+<article>
+<header>
+    <div class="meta pubdates">
+        <span class="pubdate">
+            <span class="pubdate-msg">Publié : </span>
+            <time class="created" datetime="${created}">${datehumain}</time>
+        </span>
+        <span class="maj">
+            <span class="maj-msg">Mise à jour : </span>
+            <time class="modified" datetime="${created}">${dateiso}</time>
+        </span>
+    </div>
+<h1>${billettitre}</h1>
+</header>
+
+<figure>
+    <img src="${billetimage}" alt="${billetimagealt}"/>
+    <figcaption>${billetimagetitre}</figcaption>
+</figure>
+
+<div class="extrait">
+    <blockquote cite="${quotecite}">
+        ${quotetext}
+    </blockquote>
+    <p class="source"><span class="auteur">${quoteauteur}</span>, <cite class="titre">${quotetitre}</cite>, ${quotemeta}.</p>
+</div>
+
+${billettexte}
+
+</article>
+<footer> 
+<address id="signature">Ce texte est publié par <span id="auteur"><a href="/karl/">Karl</a></span> sous un <a rel="license" href="http://creativecommons.org/licenses/by/2.0/fr/">contrat Creative Commons</a>. <a id="glicense" rel="license" href="http://creativecommons.org/licenses/by/2.0/fr/"><img alt="Creative Commons License" style="padding:0 1em;margin-bottom:7px;border-width:0" src="/2011/09/30/style/80x15-by" /></a></address>
+
+</footer>
+
+</body>
+</html>
