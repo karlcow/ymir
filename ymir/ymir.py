@@ -102,7 +102,7 @@ def getcontent(doc):
 def gettitle(doc):
     """return a list of markup and text being the title of the document"""
     findtitle = etree.ETXPath("//{%s}h1[text()]" % HTMLNS)
-    if len(findtitle(doc)) == 0:
+    if not findtitle(doc):
         sys.exit("ERROR: The document has no title")
     title = findtitle(doc)[0]
     titlemarkup = etree.tostring(title, encoding="utf-8")
