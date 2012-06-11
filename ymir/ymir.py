@@ -305,25 +305,22 @@ def updatearchivemap():
     pass
 
 
-def createmonthlyindex(monthindexpath, indexmarkup):
+def createmonthlyindex(indexmarkup):
     """create a monthly index when it doesn't exist"""
     # Code ici pour lire un fichier avec des variables
     # substituer les variables par les valeurs du mois
     # sauver le fichier au bon endroit
-    if os.path.isfile(monthindexpath):
-        pass
-    else:
-        print "Do not forget to update /map with your tiny hands"
-        with open(TEMPLATEDIR + 'index-mois.html', 'r') as source:
-            t = Template(source.read())
-            datestring = nowdate('iso')
-            datehumain = nowdate('humain')
-            # to get month, we split in 3 the human date and take the second argument
-            datemois = datehumain.split(' ')[1]
-            indexli = etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
-            result = t.substitute(isodateshort = datestring, monthname = datemois, year = datestring[:4], humandate = datehumain, firstentry = indexli)
-            # need to write it on the filesystem.
-            print result
+    print "Do not forget to update /map with your tiny hands"
+    with open(TEMPLATEDIR + 'index-mois.html', 'r') as source:
+        t = Template(source.read())
+        datestring = nowdate('iso')
+        datehumain = nowdate('humain')
+        # to get month, we split in 3 the human date and take the second argument
+        datemois = datehumain.split(' ')[1]
+        indexli = etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
+        result = t.substitute(isodateshort = datestring, monthname = datemois, year = datestring[:4], humandate = datehumain, firstentry = indexli)
+        # need to write it on the filesystem.
+        print result
 
 
 def createannualindex(year):
@@ -373,7 +370,8 @@ def main():
     print etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
     # Create the monthly index if it doesn't exist yet
     # Happen once a month
-    createmonthlyindex(monthindexpath, indexmarkup)
+    if not os.path.isfile(monthindexpath):
+        createmonthlyindex(indexmarkup)
     # Create the yearly index if it doesn't exist yet
     # Happen once a year
     # TODO
