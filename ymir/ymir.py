@@ -1,10 +1,11 @@
 #!/usr/bin/env python2.7
 # encoding: utf-8
 """
-ylmir.py
+ymir.py
 
 Created by Karl Dubost on 2011-12-03.
 Copyright (c) 2011 Grange. All rights reserved.
+see LICENSE.TXT
 """
 
 import sys
@@ -74,28 +75,6 @@ def parserawpost(rawpostpath):
     return doc
 
 # Extracting information from the blog posts
-
-
-def getdocstatus(doc):
-    """Check the publication status of the document
-    returns a string
-    if there are multiple meta, returns the first one and issues a warning"""
-    findstatus = etree.ETXPath("//{%s}meta[@name='status']" % HTMLNS)
-    docstatus = findstatus(doc)
-    if len(docstatus) >= 1:
-        status = docstatus[0].attrib['content']
-        if status in STATUSLIST:
-            if len(docstatus) > 1:
-                print "WARNING: There are more than one status. Taking the first one : " + status
-            else:
-                print "INFO: The document status is " + status
-            return status
-        else:
-            raise Exception, "ERROR: No valid status for your document: %s not in %s" % (status, STATUSLIST)
-    if len(docstatus) == 0:
-        print "WARNING: There is no status for this document."
-        status = "undefined"
-        return status
 
 
 def getdocdate(doc, DATETYPE):
@@ -372,7 +351,6 @@ def main():
     rawpost = parserawpost(rawpostpath)
     abspathpost = os.path.abspath(rawpostpath.name)
     # A few tests when developing
-    # STATUS = getdocstatus(rawpost)
     titlemarkup, title = gettitle(rawpost)
     title = title.decode("utf-8")
     print "TITLE: ", title
@@ -402,7 +380,7 @@ def main():
     # Create Feed
     tagid = createtagid(posturl, created)
     feedentry = makefeedentry(posturl, tagid, title, created, nowdate('rfc3339'), content)
-    #print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
+    print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
     # print updatemonthlyindex(indexmarkup, monthindexpath)
 
     # feedbase = makefeedskeleton(SITENAME, TAGLINE, FEEDTAGID, FEEDLANG, FEEDATOMURL, SITE, LICENSELIST['ccby'], FAVICON, AUTHOR, AUTHORURI)
