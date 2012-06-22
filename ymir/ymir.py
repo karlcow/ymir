@@ -17,13 +17,15 @@ from lxml.html import html5parser
 from lxml import etree
 from lxml.etree import Element, SubElement
 from string import Template
+from ConfigParser import SafeConfigParser
 
 
 # CONFIG SITE
 DOMAIN = u"la-grange.net"
 SITE = u"http://www.%s/" % (DOMAIN)
 FAVICON = SITE + "favicon"
-TEMPLATEDIR = os.path.dirname(sys.argv[0]) + "/templates/"
+CODEPATH = os.path.dirname(sys.argv[0])
+TEMPLATEDIR = CODEPATH + "/templates/"
 
 SITENAME = u"Les carnets Web de La Grange"
 TAGLINE = u"Rêveries le long d'un brin de chèvrefeuille"
@@ -342,9 +344,15 @@ def main():
     atomgroup.add_argument('--noatom', help='do not create the atom feed', action='store_false', dest='createfeed', default=False)
 
     args = parser.parse_args()
-    rawpostpath = args.rawpost[0]
+
+    # Reading the Blog Config file
+    # Preparing the future of reading values from a config file.
+    blogcfg = SafeConfigParser()
+    blogcfg.read(CODEPATH + '/blog.cfg')
+    #print "CONFIG: ", blogcfg.get('blog', 'sitename')
 
     # Parse the document
+    rawpostpath = args.rawpost[0]
     rawpost = parserawpost(rawpostpath)
     abspathpost = os.path.abspath(rawpostpath.name)
     # A few tests when developing
