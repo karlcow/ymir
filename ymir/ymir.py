@@ -202,7 +202,7 @@ def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
 def createtagid(urlpath, isodate):
     """Create a unide tagid for a given blog post
     tag:la-grange.net,2012-01-24:2012/01/24/silence"""
-    tagid = "tag:%s,%s:%s" % (DOMAIN, isodate[:-10], urlpath.lstrip(SITE))
+    tagid = "tag:%s,%s:%s" % (DOMAIN, isodate[0:10], urlpath.lstrip(SITE))
     return tagid
 
 
