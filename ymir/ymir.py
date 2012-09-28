@@ -312,7 +312,7 @@ def createmonthlyindex(indexmarkup):
     # substituer les variables par les valeurs du mois
     # sauver le fichier au bon endroit
     msg = "Do not forget to update /map with your tiny hands"
-    logging.info("%s" % (title))
+    logging.info("%s" % (msg))
 
     with open(TEMPLATEDIR + 'index-mois.html', 'r') as source:
         t = Template(source.read())
@@ -328,14 +328,21 @@ def createmonthlyindex(indexmarkup):
 
 def createannualindex(year):
     """create an annual index when it doesn't exist"""
-    pass
+    msg = "creating the annual index"
+    logging.info("%s" % (msg))
+    with open(TEMPLATEDIR + 'index-year.html', 'r') as source:
+        t = Template(source.read())
+        datestring = nowdate('iso')
+        indexli = etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
+        result = t.substitute(year = datestring[:4], firstentry = indexli)
+        # need to write it on the filesystem.
+        print result
 
 # MAIN
 
 
 def main():
     logging.basicConfig(filename='log-ymir.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
 
     # Parsing the cli
     parser = argparse.ArgumentParser(description="Managing Web site blog posts")
