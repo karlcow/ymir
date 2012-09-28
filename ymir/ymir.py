@@ -350,7 +350,6 @@ def main():
     # Preparing the future of reading values from a config file.
     blogcfg = SafeConfigParser()
     blogcfg.read(CODEPATH + '/blog.cfg')
-    #print "CONFIG: ", blogcfg.get('blog', 'sitename')
 
     # Parse the document
     rawpostpath = args.rawpost[0]
@@ -387,14 +386,6 @@ def main():
     tagid = createtagid(posturl, created)
     feedentry = makefeedentry(posturl, tagid, title, created, nowdate('rfc3339'), content)
     print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
-    # print updatemonthlyindex(indexmarkup, monthindexpath)
-
-    # feedbase = makefeedskeleton(SITENAME, TAGLINE, FEEDTAGID, FEEDLANG, FEEDATOMURL, SITE, LICENSELIST['ccby'], FAVICON, AUTHOR, AUTHORURI)
-    # print etree.tostring(monthlyindex, encoding="utf-8",pretty_print=True)
-    # two cases
-    # either it is already in the list: update
-    # It is not in the list: new post
-    # check the path
 
 if __name__ == "__main__":
     sys.exit(main())
