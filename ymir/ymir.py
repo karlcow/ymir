@@ -285,12 +285,12 @@ def updatemonthlyindex(indexmarkup, monthindexpath):
     # hmmm what about if the date is not in order :)
 
 
-# NEED TO FIX THE NAMESPACE output.
 def createindexmarkup(postpath, created, title):
     """Create the Markup necessary to update the indexes"""
     dcreated = {'class': 'created', 'datetime': created}
     # Creating the Markup
-    li = etree.Element("{%s}li" % HTMLNS, nsmap=NSMAP)
+    # li = etree.Element("{%s}li" % HTMLNS, nsmap=NSMAP)
+    li = etree.Element("li")
     ctime = etree.SubElement(li, 'time', dcreated)
     ctime.text = created[:10]
     ctime.tail = u" : "
@@ -311,7 +311,9 @@ def createmonthlyindex(indexmarkup):
     # Code ici pour lire un fichier avec des variables
     # substituer les variables par les valeurs du mois
     # sauver le fichier au bon endroit
-    print "Do not forget to update /map with your tiny hands"
+    msg = "Do not forget to update /map with your tiny hands"
+    logging.info("%s" % (title))
+
     with open(TEMPLATEDIR + 'index-mois.html', 'r') as source:
         t = Template(source.read())
         datestring = nowdate('iso')
