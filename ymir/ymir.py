@@ -25,7 +25,7 @@ DOMAIN = u"la-grange.net"
 SITE = u"http://www.%s/" % (DOMAIN)
 FAVICON = SITE + "favicon"
 CODEPATH = os.path.dirname(sys.argv[0])
-TEMPLATEDIR = CODEPATH + "/templates/"
+TEMPLATEDIR = CODEPATH + "/../templates/"
 
 SITENAME = u"Les carnets Web de La Grange"
 TAGLINE = u"Rêveries le long d'un brin de chèvrefeuille"
@@ -74,6 +74,7 @@ def parserawpost(rawpostpath):
     doc = html5parser.parse(rawpostpath).getroot()
     #TODO find a way to send the element with only the namespace on the first element.
     print "INFO: Document parsed"
+    print etree.tostring(doc, encoding="utf-8")
     return doc
 
 # Extracting information from the blog posts
