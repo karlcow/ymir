@@ -18,7 +18,7 @@ from lxml import etree
 from lxml.etree import Element, SubElement
 from string import Template
 from ConfigParser import SafeConfigParser
-
+import logging
 
 # CONFIG SITE
 DOMAIN = u"la-grange.net"
@@ -72,9 +72,7 @@ def parserawpost(rawpostpath):
     TODO check if the file is correct.
     """
     doc = html5parser.parse(rawpostpath).getroot()
-    #TODO find a way to send the element with only the namespace on the first element.
     print "INFO: Document parsed"
-    print etree.tostring(doc, encoding="utf-8")
     return doc
 
 # Extracting information from the blog posts
@@ -334,6 +332,8 @@ def createannualindex(year):
 
 
 def main():
+    logging.basicConfig(filename='log-ymir.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
     # Parsing the cli
     parser = argparse.ArgumentParser(description="Managing Web site blog posts")
@@ -358,13 +358,12 @@ def main():
     abspathpost = os.path.abspath(rawpostpath.name)
     # A few tests when developing
     titlemarkup, title = gettitle(rawpost)
-    title = title.decode("utf-8")
-    print "TITLE: ", title
-    print "TITLEMARKUP: ", titlemarkup
+    title = title.decode("utf-8").strip()
+    logging.info("TITLE: %s" % (title))
     created = getdocdate(rawpost, 'created')
+    logging.info("CREATED: %s" % (created))
     modified = getdocdate(rawpost, 'modified')
-    print "CREATED:  ", created
-    print "MODIFIED: ", modified
+    logging.info("MODIFIED: %s" % (modified))
     content = getcontent(rawpost)
 
     # What are the paths?
