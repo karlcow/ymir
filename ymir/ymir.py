@@ -342,6 +342,7 @@ def createannualindex(year):
 
 
 def main():
+    "main program"
     logging.basicConfig(filename='log-ymir.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
     # Parsing the cli
