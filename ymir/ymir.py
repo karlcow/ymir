@@ -11,7 +11,8 @@ see LICENSE.TXT
 import sys
 import os
 import locale
-from time import gmtime, strftime, localtime
+from time import gmtime, strftime, strptime, localtime
+from datetime import datetime, timedelta
 import argparse
 from lxml.html import html5parser
 from lxml import etree
@@ -56,6 +57,8 @@ STYLESHEET = "/2011/12/01/proto/style/article.css"
 STATUS = ""
 MAXFEEDITEM = 20
 LICENSE = "ccby"
+
+DATENOW = datetime.today()
 
 # PATHS
 
@@ -208,21 +211,41 @@ def createtagid(urlpath, isodate):
     tagid = "tag:%s,%s:%s" % (DOMAIN, isodate[0:10], urlpath.lstrip(SITE))
     return tagid
 
+def rfc3339_to_date(date_time):
+    """Simple rfc3339 converter. Incomplete because I know my feed format.
+    Do not reuse elsewhere.
+    2014-04-04T23:59:00+09:00
+    2014-04-04T23:59:00Z"""
+    # 2014-04-04T23:59:00+09:00 -> # 2014-04-04T23:59:00
+    partial_date_time = date_time[:19]
+    date_obj = datetime.strptime(partial_date_time, "%Y-%m-%dT%H:%M:%S")
+    time_offset = date_time[19:]
+    if 'Z' in time_offset:
+        final_date = date_obj
+    elif '+' in time_offset:
+        tz_hours = int(time_offset[1:3])
+        tz_minutes = int(time_offset[4:6])
+        final_date = date_obj - timedelta(hours=tz_hours, minutes=tz_minutes)
+    elif '-' in time_offset:
+        tz_hours = int(time_offset[1:3])
+        tz_minutes = int(time_offset[4:6])
+        final_date = date_obj + timedelta(hours=tz_hours, minutes=tz_minutes)
+    return final_date
 
-def nowdate(format=""):
+def nowdate(date_time, format=""):
     """Compute date in different formats I need"""
     # date in French please
     my_locale = "fr_FR"
     locale.setlocale(locale.LC_ALL, my_locale)
     if format == "rfc3339":
-        return strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
+        return date_time.strftime("%Y-%m-%dT%H:%M:%SZ")
     elif format == "iso":
-        return strftime("%Y-%m-%d", gmtime())
+        return date_time.strftime("%Y-%m-%d")
     elif format == "path":
-        return strftime("%Y/%m/%d", gmtime())
+        return date_time.strftime("%Y/%m/%d")
     elif format == "humain":
         # remove the leading 0 of the date
-        dategeek = strftime("%d %B %Y", gmtime())
+        dategeek = date_time.strftime("%d %B %Y")
         if dategeek.startswith('0'):
             dategeek = dategeek.lstrip('0')
         return dategeek
@@ -230,10 +253,10 @@ def nowdate(format=""):
         # Remove the leading 0
         # And add the day of the week
         # "Vendredi "+ "3 février 2012"
-        dategeek = strftime("%d %B %Y", localtime())
+        dategeek = date_time.strftime("%d %B %Y")
         if dategeek.startswith('0'):
             dategeek = dategeek.lstrip('0')
-        return strftime("%A ", localtime()) + dategeek
+        return date_time.strftime("%A ") + dategeek
     else:
         print "wrong format"
         sys.exit(1)
@@ -312,6 +335,7 @@ def updatearchivemap():
     pass
 
 
+
 def createmonthlyindex(indexmarkup):
     """create a monthly index when it doesn't exist"""
     # Code ici pour lire un fichier avec des variables
@@ -322,8 +346,8 @@ def createmonthlyindex(indexmarkup):
 
     with open(TEMPLATEDIR + 'index-mois.html', 'r') as source:
         t = Template(source.read())
-        datestring = nowdate('iso')
-        datehumain = nowdate('humain')
+        datestring = nowdate(DATENOW, 'iso')
+        datehumain = nowdate(DATENOW, 'humain')
         # to get month, we split in 3 the human date and take the second
         # argument
         datemois = datehumain.split(' ')[1]
@@ -335,14 +359,13 @@ def createmonthlyindex(indexmarkup):
         # need to write it on the filesystem.
         print result
 
-
 def createannualindex(year):
     """create an annual index when it doesn't exist"""
     msg = "creating the annual index"
     logging.info("%s" % (msg))
     with open(TEMPLATEDIR + 'index-year.html', 'r') as source:
         t = Template(source.read())
-        datestring = nowdate('iso')
+        datestring = nowdate(DATENOW, 'iso')
         indexli = etree.tostring(
             indexmarkup, pretty_print=True, encoding='utf-8')
         result = t.substitute(year=datestring[:4], firstentry=indexli)
@@ -392,6 +415,7 @@ def main():
     created = getdocdate(rawpost, 'created')
     logging.info("CREATED: %s" % (created))
     modified = getdocdate(rawpost, 'modified')
+    DATENOW = rfc3339_to_date(modified)
     logging.info("MODIFIED: %s" % (modified))
     content = getcontent(rawpost)
 
@@ -415,7 +439,7 @@ def main():
     # Create Feed
     tagid = createtagid(posturl, created)
     feedentry = makefeedentry(
-        posturl, tagid, title, created, nowdate('rfc3339'), content)
+        posturl, tagid, title, created, nowdate(DATENOW, 'rfc3339'), content)
     print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
 
 if __name__ == "__main__":
