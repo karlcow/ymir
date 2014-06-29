@@ -15,6 +15,7 @@ from time import gmtime, strftime, strptime, localtime
 from datetime import datetime, timedelta
 import argparse
 from lxml.html import html5parser
+import lxml.html
 from lxml import etree
 from lxml.etree import Element, SubElement
 from string import Template
@@ -267,10 +268,17 @@ def updatefeed(feedentry):
     pass
 
 
-def updateannualindex(feedentry):
-    """update the HTML Annual index with the feedendry"""
-    pass
-
+def update_home_index(index_path, home_index):
+    """update the HTML index with the feedendry content"""
+    lis = lxml.html.fragment_fromstring(home_index)
+    if os.path.isfile(index_path):
+        html = lxml.html.parse(index_path)
+        home = html.getroot()
+    else:
+        print "wrong path"
+    blog_ul = home.get_element_by_id("blog_index")
+    blog_ul.getparent().replace(blog_ul, lis)
+    return lxml.html.tostring(html, encoding='utf-8')
 
 def updatemonthlyindex(indexmarkup, monthindexpath):
     """update the HTML Annual index with the feedendry"""
@@ -375,7 +383,6 @@ def createannualindex(year):
 def last_posts(feed_path):
     """create a dictionary index of the last post using the Atom feed"""
     entries = []
-    feed_path = '/Users/karl/Sites/la-grange.net/feed.atom'
     parser = etree.XMLParser(ns_clean=True)
     with open(feed_path, 'r') as source:
         feed_tree = etree.parse(source, parser)
@@ -406,13 +413,17 @@ def last_posts_html(entries):
     with open(TEMPLATEDIR + 'last_posts.html', 'r') as source:
         t = Template(source.read())
         for i, entry in enumerate(entries):
+            updated = entry['updated']
+            hupdated = nowdate(rfc3339_to_date(updated), 'humain')
+            published = entry['published']
+            hpublished = nowdate(rfc3339_to_date(published), 'humain')
             last_posts_markup += t.substitute(
                 ttitle=entry['title'],
                 turl=entry['url'],
-                tupdated=entry['updated'],
-                tupdated_human='@@',
-                tpublished=entry['published'],
-                tpublished_human='@@')
+                tupdated=updated,
+                tupdated_human=hupdated,
+                tpublished=published,
+                tpublished_human=hpublished)
     return last_posts_markup
 
 # MAIN
@@ -484,6 +495,16 @@ def main():
     feedentry = makefeedentry(
         posturl, tagid, title, created, nowdate(DATENOW, 'rfc3339'), content)
     print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
+    feed_path = '/Users/karl/Sites/la-grange.net/feed.atom'
+    entries = last_posts(feed_path)
+    home_index = "<ul id='blog_index'>" + last_posts_html(entries) + "</ul>"
+    # Update the index home page
+    index_path ='/Users/karl/Sites/la-grange.net/index.html'
+    home_content = update_home_index(index_path, home_index)
+    with open(index_path, 'w') as home:
+        home.write(home_content)
+
+
 
 if __name__ == "__main__":
     sys.exit(main())
