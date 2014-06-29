@@ -372,6 +372,49 @@ def createannualindex(year):
         # need to write it on the filesystem.
         print result
 
+def last_posts(feed_path):
+    """create a dictionary index of the last post using the Atom feed"""
+    entries = []
+    feed_path = '/Users/karl/Sites/la-grange.net/feed.atom'
+    parser = etree.XMLParser(ns_clean=True)
+    with open(feed_path, 'r') as source:
+        feed_tree = etree.parse(source, parser)
+    feed_root = feed_tree.getroot()
+    # Information we need: title, dates, link
+    find_entry = etree.ETXPath("//{%s}entry" % ATOMNS)
+    find_title = etree.ETXPath("{%s}title/text()" % ATOMNS)
+    find_published = etree.ETXPath("{%s}published/text()" % ATOMNS)
+    find_updated = etree.ETXPath("{%s}updated/text()" % ATOMNS)
+    # Only the link pointing to the blog post
+    find_url = etree.ETXPath("{%s}link[@rel='alternate']/@href" % ATOMNS)
+    # Extract all the entries
+    feed_entries = find_entry(feed_root)
+    # We iterate through them
+    for entry in feed_entries:
+        entry_data = {'title': find_title(entry)[0],
+                      'published': find_published(entry)[0],
+                      'updated': find_updated(entry)[0],
+                      'url': find_url(entry)[0]}
+        entries.append(entry_data)
+    return entries
+
+def last_posts_html(entries):
+    """Return the HTML markup for the last entries"""
+    # msg = "Generating HTML markup for last entries in the feed"
+    # logging.info("%s" % (msg))
+    last_posts_markup = ""
+    with open(TEMPLATEDIR + 'last_posts.html', 'r') as source:
+        t = Template(source.read())
+        for i, entry in enumerate(entries):
+            last_posts_markup += t.substitute(
+                ttitle=entry['title'],
+                turl=entry['url'],
+                tupdated=entry['updated'],
+                tupdated_human='@@',
+                tpublished=entry['published'],
+                tpublished_human='@@')
+    return last_posts_markup
+
 # MAIN
 
 
