@@ -37,7 +37,8 @@ FEEDATOMURL = u"%s%s" % (SITE, FEEDATOMNOM)
 
 STATUSLIST = [u'draft', u'pub', u'acl']
 DATETYPELIST = [u'created', u'modified']
-LICENSELIST = {u'ccby': u'http://creativecommons.org/licenses/by/2.0/fr/', u'copy': u'©'}
+LICENSELIST = {u'ccby': u'http://creativecommons.org/licenses/by/2.0/fr/',
+               u'copy': u'©'}
 
 AUTHOR = u"Karl Dubost"
 AUTHORURI = u"http://www.la-grange.net/karl/"
@@ -84,7 +85,8 @@ def getdocdate(doc, DATETYPE):
     # TODO: check if the format is correct aka YYYY-MM-DD
     if DATETYPE not in DATETYPELIST:
         sys.exit("ERROR: No valid type for the date: " + DATETYPE)
-    finddate = etree.ETXPath("string(//{%s}time[@class=%r]/@datetime)" % (HTMLNS, DATETYPE))
+    finddate = etree.ETXPath(
+        "string(//{%s}time[@class=%r]/@datetime)" % (HTMLNS, DATETYPE))
     date = finddate(doc)
     return date
 
@@ -112,11 +114,13 @@ def gettitle(doc):
 
 
 def makeblogpost(doc):
-    """create a blog post ready to be publish from a raw or already published document"""
+    """create a blog post ready to be publish
+    from a raw or already published document"""
     pass
 
 
-def makefeedskeleton(websitetitle, tagline, feedtagid, lang, feedatomurl, site, license, faviconlink, authorname, authoruri):
+def makefeedskeleton(websitetitle, tagline, feedtagid, lang, feedatomurl,
+                     site, license, faviconlink, authorname, authoruri):
     """create the feed skeleton for a specific Web site"""
     feed = Element('feed')
     feed.attrib['lang'] = lang
@@ -257,7 +261,9 @@ def updatemonthlyindex(indexmarkup, monthindexpath):
         createmonthlyindex(monthindexpath)
     # grab the path and the modified date for the blog post
     anchor = indexmarkup.xpath("/li/a")
-    newmodified = indexmarkup.xpath("/html:li/time[@class='modified']/text()", namespaces={'html': 'http://www.w3.org/1999/xhtml'})[0]
+    newmodified = indexmarkup.xpath(
+        "/html:li/time[@class='modified']/text()",
+        namespaces={'html': 'http://www.w3.org/1999/xhtml'})[0]
     link = anchor[0].get('href')
     # check if the element is already in the list
     findli = etree.ETXPath("//{%s}li/{%s}a" % (HTMLNS, HTMLNS))
@@ -318,10 +324,14 @@ def createmonthlyindex(indexmarkup):
         t = Template(source.read())
         datestring = nowdate('iso')
         datehumain = nowdate('humain')
-        # to get month, we split in 3 the human date and take the second argument
+        # to get month, we split in 3 the human date and take the second
+        # argument
         datemois = datehumain.split(' ')[1]
-        indexli = etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
-        result = t.substitute(isodateshort = datestring, monthname = datemois, year = datestring[:4], humandate = datehumain, firstentry = indexli)
+        indexli = etree.tostring(
+            indexmarkup, pretty_print=True, encoding='utf-8')
+        result = t.substitute(isodateshort=datestring, monthname=datemois,
+                              year=datestring[:4], humandate=datehumain,
+                              firstentry=indexli)
         # need to write it on the filesystem.
         print result
 
@@ -333,8 +343,9 @@ def createannualindex(year):
     with open(TEMPLATEDIR + 'index-year.html', 'r') as source:
         t = Template(source.read())
         datestring = nowdate('iso')
-        indexli = etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
-        result = t.substitute(year = datestring[:4], firstentry = indexli)
+        indexli = etree.tostring(
+            indexmarkup, pretty_print=True, encoding='utf-8')
+        result = t.substitute(year=datestring[:4], firstentry=indexli)
         # need to write it on the filesystem.
         print result
 
@@ -343,16 +354,25 @@ def createannualindex(year):
 
 def main():
     "main program"
-    logging.basicConfig(filename='log-ymir.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(filename='log-ymir.txt', level=logging.DEBUG,
+                        format='%(asctime)s - %(levelname)s - %(message)s')
 
     # Parsing the cli
-    parser = argparse.ArgumentParser(description="Managing Web site blog posts")
+    parser = argparse.ArgumentParser(
+        description="Managing Web site blog posts")
 
-    parser.add_argument('rawpost', metavar='FILE', help='file to be processed', action='store', nargs=1, type=argparse.FileType('rt'))
-    parser.add_argument('-o', '--output', help='the blog post ready to be sync', nargs=1, dest="output", type=argparse.FileType('wt'))
+    parser.add_argument('rawpost', metavar='FILE', help='file to be processed',
+                        action='store', nargs=1, type=argparse.FileType('rt'))
+    parser.add_argument(
+        '-o', '--output', help='the blog post ready to be sync',
+        nargs=1, dest="output", type=argparse.FileType('wt'))
     atomgroup = parser.add_mutually_exclusive_group()
-    atomgroup.add_argument('--atom', help='create an atom feed. DEFAULT', action='store_true', dest="createfeed", default=True)
-    atomgroup.add_argument('--noatom', help='do not create the atom feed', action='store_false', dest='createfeed', default=False)
+    atomgroup.add_argument('--atom', help='create an atom feed. DEFAULT',
+                           action='store_true', dest="createfeed",
+                           default=True)
+    atomgroup.add_argument('--noatom', help='do not create the atom feed',
+                           action='store_false', dest='createfeed',
+                           default=False)
 
     args = parser.parse_args()
 
@@ -390,11 +410,12 @@ def main():
     if not os.path.isfile(monthindexpath):
         createmonthlyindex(indexmarkup)
     # Create the yearly index if it doesn't exist yet
-    # Happen once a year
+    # Happen once a year, maybe not a priority
     # TODO
     # Create Feed
     tagid = createtagid(posturl, created)
-    feedentry = makefeedentry(posturl, tagid, title, created, nowdate('rfc3339'), content)
+    feedentry = makefeedentry(
+        posturl, tagid, title, created, nowdate('rfc3339'), content)
     print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
 
 if __name__ == "__main__":
