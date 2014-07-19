@@ -291,14 +291,20 @@ def updatefeed(feedentry):
     pass
 
 
-def update_home_index(index_path, home_index):
+def update_home_index(feed_path, home_path):
     '''update the HTML index with the feedendry content'''
-    lis = lxml.html.fragment_fromstring(home_index)
-    if os.path.isfile(index_path):
-        html = lxml.html.parse(index_path)
+    # Get HTML from the index
+    if os.path.isfile(home_path):
+        html = lxml.html.parse(home_path)
         home = html.getroot()
     else:
-        print "wrong path"
+        logging.error("WRONG PATH: %s" % (home_path))
+    # Get an entry dictionary from the Feed
+    entries = last_posts(feed_path)
+    # Generate string with markup
+    home_index = "<ul id='blog_index'>" + last_posts_html(entries) + "</ul>"
+    lis = lxml.html.fragment_fromstring(home_index)
+    # replace the content of the home index
     blog_ul = home.get_element_by_id("blog_index")
     blog_ul.getparent().replace(blog_ul, lis)
     return lxml.html.tostring(html, encoding='utf-8')
@@ -477,6 +483,8 @@ def main():
     # What are the paths?
     monthabspath = os.path.dirname(os.path.dirname(abspathpost))
     postpath = abspathpost[len(site_root):]
+    feed_path = '%s/%s' % (site_root, FEEDATOMNOM)
+    home_path = '%s/%s' % (site_root, 'index.html')
     # give the full URL of the blog post without the extension
     posturl = "%s%s" % (SITE[:-1], postpath[:-5])
     monthindexpath = monthabspath + "/index.html"
@@ -510,13 +518,8 @@ def main():
     # print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
 
     # UPDATING HOME PAGE
-    feed_path = '/Users/karl/Sites/la-grange.net/feed.atom'
-    entries = last_posts(feed_path)
-    home_index = "<ul id='blog_index'>" + last_posts_html(entries) + "</ul>"
-    # Update the index home page
-    index_path ='/Users/karl/Sites/la-grange.net/index.html'
-    home_content = update_home_index(index_path, home_index)
-    with open(index_path, 'w') as home:
+    home_content = update_home_index(feed_path, home_path)
+    with open(home_path, 'w') as home:
         home.write(home_content)
 
 
