@@ -1,12 +1,12 @@
 #!/usr/bin/env python2.7
 # encoding: utf-8
-"""
+'''
 ymir.py
 
 Created by Karl Dubost on 2011-12-03.
 Copyright (c) 2011 Grange. All rights reserved.
 see LICENSE.TXT
-"""
+'''
 
 import sys
 import os
@@ -73,9 +73,9 @@ La Grange http://www.la-grange.net/.
 
 
 def parserawpost(rawpostpath):
-    """Given a path, parse an html file
+    '''Given a path, parse an html file
     TODO check if the file is correct.
-    """
+    '''
     doc = html5parser.parse(rawpostpath).getroot()
     print "INFO: Document parsed"
     return doc
@@ -84,8 +84,9 @@ def parserawpost(rawpostpath):
 
 
 def getdocdate(doc, DATETYPE):
-    """return the creation date of the document in ISO format YYYY-MM-DD
-    Input the document, typeofdate in between created and modified"""
+    '''return the creation date of the document in ISO format YYYY-MM-DD
+    Input the document, typeofdate in between created and modified
+    '''
     # TODO: check if the format is correct aka YYYY-MM-DD
     if DATETYPE not in DATETYPELIST:
         sys.exit("ERROR: No valid type for the date: " + DATETYPE)
@@ -96,7 +97,7 @@ def getdocdate(doc, DATETYPE):
 
 
 def getcontent(doc):
-    """return the full content of an article"""
+    '''return the full content of an article'''
     findcontent = etree.ETXPath("//{%s}article" % HTMLNS)
     content = findcontent(doc)[0]
     # we want the content without the dates and the title
@@ -107,7 +108,7 @@ def getcontent(doc):
 
 
 def gettitle(doc):
-    """return a list of markup and text being the title of the document"""
+    '''return a list of markup and text being the title of the document'''
     findtitle = etree.ETXPath("//{%s}h1[text()]" % HTMLNS)
     if not findtitle(doc):
         sys.exit("ERROR: The document has no title")
@@ -118,14 +119,14 @@ def gettitle(doc):
 
 
 def makeblogpost(doc):
-    """create a blog post ready to be publish
-    from a raw or already published document"""
+    '''create a blog post ready to be publish
+    from a raw or already published document'''
     pass
 
 
 def makefeedskeleton(websitetitle, tagline, feedtagid, lang, feedatomurl,
                      site, license, faviconlink, authorname, authoruri):
-    """create the feed skeleton for a specific Web site"""
+    '''create the feed skeleton for a specific Web site'''
     feed = Element('feed')
     feed.attrib['lang'] = lang
 
@@ -178,7 +179,7 @@ def makefeedskeleton(websitetitle, tagline, feedtagid, lang, feedatomurl,
 
 
 def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
-    """create an individual Atom feed entry from a ready to be publish post"""
+    '''create an individual Atom feed entry from a ready to be publish post'''
     entry = Element('entry', nsmap=NSMAP2)
     id = SubElement(entry, 'id')
     id.text = tagid
@@ -207,34 +208,37 @@ def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
 
 
 def createtagid(urlpath, isodate):
-    """Create a unide tagid for a given blog post
-    tag:la-grange.net,2012-01-24:2012/01/24/silence"""
+    '''Create a unide tagid for a given blog post
+    tag:la-grange.net,2012-01-24:2012/01/24/silence'''
     tagid = "tag:%s,%s:%s" % (DOMAIN, isodate[0:10], urlpath.lstrip(SITE))
     return tagid
 
-def rfc3339_to_date(date_time):
-    """Simple rfc3339 converter. Incomplete because I know my feed format.
+def rfc3339_to_datetime(rfc3339_date_time):
+    '''Simple rfc3339 converter. Incomplete because I know my format.
     Do not reuse elsewhere.
     2014-04-04T23:59:00+09:00
-    2014-04-04T23:59:00Z"""
-    # 2014-04-04T23:59:00+09:00 -> # 2014-04-04T23:59:00
-    partial_date_time = date_time[:19]
-    date_obj = datetime.strptime(partial_date_time, "%Y-%m-%dT%H:%M:%S")
-    time_offset = date_time[19:]
-    if 'Z' in time_offset:
-        final_date = date_obj
-    elif '+' in time_offset:
-        tz_hours = int(time_offset[1:3])
-        tz_minutes = int(time_offset[4:6])
-        final_date = date_obj - timedelta(hours=tz_hours, minutes=tz_minutes)
-    elif '-' in time_offset:
-        tz_hours = int(time_offset[1:3])
-        tz_minutes = int(time_offset[4:6])
-        final_date = date_obj + timedelta(hours=tz_hours, minutes=tz_minutes)
-    return final_date
+    2014-04-04T23:59:00Z'''
+    # Extraire la date et le temps sans le fuseau
+    # 2014-04-04T23:59:00+09:00 -> 2014-04-04T23:59:00
+    date_time, offset = rfc3339_date_time[:19], rfc3339_date_time[19:]
+    # convertir en objet datetime
+    date_time = datetime.strptime(date_time, "%Y-%m-%dT%H:%M:%S")
+    # extraire le fuseau horaire
+    # 2014-04-04T23:59:00+09:00 -> +09:00
+    # 2014-04-04T23:59:00Z      -> Z
+    # Si Z, on est déjà en UTC.
+    if 'Z' not in offset:
+        tz_hours, tz_minutes = int(offset[1:3]), int(offset[4:6])
+        if '+' in offset:
+            # si + on doit déduire le temps pour obtenir l'heure en UTC
+            date_time -= timedelta(hours=tz_hours, minutes=tz_minutes)
+        else:
+            # si - on doit ajouter le temps pour obtenir l'heure en UTC
+            date_time += timedelta(hours=tz_hours, minutes=tz_minutes)
+    return date_time
 
 def nowdate(date_time, format=""):
-    """Compute date in different formats I need"""
+    '''Compute date in different formats I need'''
     # date in French please
     my_locale = "fr_FR"
     locale.setlocale(locale.LC_ALL, my_locale)
@@ -264,12 +268,12 @@ def nowdate(date_time, format=""):
 
 
 def updatefeed(feedentry):
-    """Update the feed with the last individual feed entry"""
+    '''Update the feed with the last individual feed entry'''
     pass
 
 
 def update_home_index(index_path, home_index):
-    """update the HTML index with the feedendry content"""
+    '''update the HTML index with the feedendry content'''
     lis = lxml.html.fragment_fromstring(home_index)
     if os.path.isfile(index_path):
         html = lxml.html.parse(index_path)
@@ -281,7 +285,7 @@ def update_home_index(index_path, home_index):
     return lxml.html.tostring(html, encoding='utf-8')
 
 def updatemonthlyindex(indexmarkup, monthindexpath):
-    """update the HTML Annual index with the feedendry"""
+    '''update the HTML Annual index with the feedendry'''
     print etree.tostring(indexmarkup, encoding="utf-8")
     # is there a monthly index.
     if os.path.isfile(monthindexpath):
@@ -323,7 +327,7 @@ def updatemonthlyindex(indexmarkup, monthindexpath):
 
 
 def createindexmarkup(postpath, created, title):
-    """Create the Markup necessary to update the indexes"""
+    '''Create the Markup necessary to update the indexes'''
     dcreated = {'class': 'created', 'datetime': created}
     # Creating the Markup
     # li = etree.Element("{%s}li" % HTMLNS, nsmap=NSMAP)
@@ -337,15 +341,15 @@ def createindexmarkup(postpath, created, title):
 
 
 def updatearchivemap():
-    """update the archive map page for new months and/or new years.
+    '''update the archive map page for new months and/or new years.
     not sure it is necessary. Manually is kind of cool with less
-    dependencies."""
+    dependencies.'''
     pass
 
 
 
 def createmonthlyindex(indexmarkup):
-    """create a monthly index when it doesn't exist"""
+    '''create a monthly index when it doesn't exist'''
     # Code ici pour lire un fichier avec des variables
     # substituer les variables par les valeurs du mois
     # sauver le fichier au bon endroit
@@ -368,7 +372,7 @@ def createmonthlyindex(indexmarkup):
         print result
 
 def createannualindex(year):
-    """create an annual index when it doesn't exist"""
+    '''create an annual index when it doesn't exist'''
     msg = "creating the annual index"
     logging.info("%s" % (msg))
     with open(TEMPLATEDIR + 'index-year.html', 'r') as source:
@@ -381,7 +385,7 @@ def createannualindex(year):
         print result
 
 def last_posts(feed_path):
-    """create a dictionary index of the last post using the Atom feed"""
+    '''create a dictionary index of the last post using the Atom feed'''
     entries = []
     parser = etree.XMLParser(ns_clean=True)
     with open(feed_path, 'r') as source:
@@ -406,7 +410,7 @@ def last_posts(feed_path):
     return entries
 
 def last_posts_html(entries):
-    """Return the HTML markup for the last entries"""
+    '''Return the HTML markup for the last entries'''
     # msg = "Generating HTML markup for last entries in the feed"
     # logging.info("%s" % (msg))
     last_posts_markup = ""
@@ -414,9 +418,9 @@ def last_posts_html(entries):
         t = Template(source.read())
         for i, entry in enumerate(entries):
             updated = entry['updated']
-            hupdated = nowdate(rfc3339_to_date(updated), 'humain')
+            hupdated = nowdate(rfc3339_to_datetime(updated), 'humain')
             published = entry['published']
-            hpublished = nowdate(rfc3339_to_date(published), 'humain')
+            hpublished = nowdate(rfc3339_to_datetime(published), 'humain')
             last_posts_markup += t.substitute(
                 ttitle=entry['title'],
                 turl=entry['url'],
@@ -440,17 +444,6 @@ def main():
 
     parser.add_argument('rawpost', metavar='FILE', help='file to be processed',
                         action='store', nargs=1, type=argparse.FileType('rt'))
-    parser.add_argument(
-        '-o', '--output', help='the blog post ready to be sync',
-        nargs=1, dest="output", type=argparse.FileType('wt'))
-    atomgroup = parser.add_mutually_exclusive_group()
-    atomgroup.add_argument('--atom', help='create an atom feed. DEFAULT',
-                           action='store_true', dest="createfeed",
-                           default=True)
-    atomgroup.add_argument('--noatom', help='do not create the atom feed',
-                           action='store_false', dest='createfeed',
-                           default=False)
-
     args = parser.parse_args()
 
     # Reading the Blog Config file
@@ -469,7 +462,7 @@ def main():
     created = getdocdate(rawpost, 'created')
     logging.info("CREATED: %s" % (created))
     modified = getdocdate(rawpost, 'modified')
-    DATENOW = rfc3339_to_date(modified)
+    DATENOW = rfc3339_to_datetime(modified)
     logging.info("MODIFIED: %s" % (modified))
     content = getcontent(rawpost)
 
