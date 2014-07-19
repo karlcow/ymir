@@ -25,6 +25,7 @@ import logging
 # CONFIG SITE
 DOMAIN = u"la-grange.net"
 SITE = u"http://www.%s/" % (DOMAIN)
+ROOT_TOKEN = u'tagid-2000-04-12'
 FAVICON = SITE + "favicon"
 CODEPATH = os.path.dirname(sys.argv[0])
 TEMPLATEDIR = CODEPATH + "/../templates/"
@@ -69,9 +70,6 @@ for processing text files for the site
 La Grange http://www.la-grange.net/.
 '''
 
-# General processing features
-
-
 def parserawpost(rawpostpath):
     '''Given a path, parse an html file
     TODO check if the file is correct.
@@ -79,6 +77,27 @@ def parserawpost(rawpostpath):
     doc = html5parser.parse(rawpostpath).getroot()
     print "INFO: Document parsed"
     return doc
+
+def find_root(directory, token):
+    """Find the root of a directory tree based on a token"""
+    # Make sure we have a full path instead of a relative path
+    if directory.startswith('.'):
+       directory = os.path.realpath(directory)
+    # Create a list of the files in the current directory
+    # If it fails the path doesn't exist
+    try:
+        files_only = [ f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) ]
+    except:
+        return None
+    # Check if the token is not among the files
+    if token not in files_only:
+        # if '/', we are at the filesystem root
+        if directory == '/':
+            return None
+        # Recursion with the upper directory
+        newpath = os.path.realpath(directory + '/../')
+        directory = find_root(newpath, token)
+    return directory
 
 # Extracting information from the blog posts
 
@@ -434,28 +453,38 @@ def last_posts_html(entries):
 
 
 def main():
-    "main program"
+    '''The core task for processing a file for La Grange'''
+    # Logging File Configuration
     logging.basicConfig(filename='log-ymir.txt', level=logging.DEBUG,
                         format='%(asctime)s - %(levelname)s - %(message)s')
 
-    # Parsing the cli
+    # Command Line Interface
     parser = argparse.ArgumentParser(
         description="Managing Web site blog posts")
 
     parser.add_argument('rawpost', metavar='FILE', help='file to be processed',
                         action='store', nargs=1, type=argparse.FileType('rt'))
     args = parser.parse_args()
-
-    # Reading the Blog Config file
-    # Preparing the future of reading values from a config file.
-    blogcfg = SafeConfigParser()
-    blogcfg.read(CODEPATH + '/blog.cfg')
-
-    # Parse the document
+    # Arguments attribution
     rawpostpath = args.rawpost[0]
-    rawpost = parserawpost(rawpostpath)
+
+    # CONFIGURATION
+    # assets path
     abspathpost = os.path.abspath(rawpostpath.name)
-    # A few tests when developing
+    # Find the root of the site
+    post_directory = os.path.dirname(abspathpost)
+    site_root = find_root(post_directory, ROOT_TOKEN)
+    # What are the paths?
+    monthabspath = os.path.dirname(os.path.dirname(abspathpost))
+    postpath = abspathpost[len(site_root):]
+    # give the full URL of the blog post without the extension
+    posturl = "%s%s" % (SITE[:-1], postpath[:-5])
+    monthindexpath = monthabspath + "/index.html"
+
+    # PROCESSING
+    # Parse the document
+    rawpost = parserawpost(rawpostpath)
+    # Extracting Post Information
     titlemarkup, title = gettitle(rawpost)
     title = title.decode("utf-8").strip()
     logging.info("TITLE: %s" % (title))
@@ -466,28 +495,21 @@ def main():
     logging.info("MODIFIED: %s" % (modified))
     content = getcontent(rawpost)
 
-    # What are the paths?
-    monthabspath = os.path.dirname(os.path.dirname(abspathpost))
-    yearabspath = os.path.dirname(monthabspath)
-    rootabspath = os.path.dirname(yearabspath)
-    postpath = abspathpost[len(rootabspath):]
-    posturl = "%s%s" % (SITE[:-1], postpath[:-5])
-    monthindexpath = monthabspath + "/index.html"
-    # Create Markup for the monthly and yearly index file
+    # INDEX MARKUP
     indexmarkup = createindexmarkup(postpath[:-5], created, title)
-    print etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
+    # print etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
     # Create the monthly index if it doesn't exist yet
     # Happen once a month
     if not os.path.isfile(monthindexpath):
         createmonthlyindex(indexmarkup)
-    # Create the yearly index if it doesn't exist yet
-    # Happen once a year, maybe not a priority
-    # TODO
-    # Create Feed
+
+    # FEED ENTRY MARKUP
     tagid = createtagid(posturl, created)
     feedentry = makefeedentry(
         posturl, tagid, title, created, nowdate(DATENOW, 'rfc3339'), content)
-    print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
+    # print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
+
+    # UPDATING HOME PAGE
     feed_path = '/Users/karl/Sites/la-grange.net/feed.atom'
     entries = last_posts(feed_path)
     home_index = "<ul id='blog_index'>" + last_posts_html(entries) + "</ul>"
