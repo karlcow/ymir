@@ -11,7 +11,7 @@ see LICENSE.TXT
 import sys
 import os
 import locale
-from time import gmtime, strftime, strptime, localtime
+from time import strftime, strptime
 from datetime import datetime, timedelta
 import argparse
 from lxml.html import html5parser
@@ -19,7 +19,6 @@ import lxml.html
 from lxml import etree
 from lxml.etree import Element, SubElement
 from string import Template
-from ConfigParser import SafeConfigParser
 import logging
 
 # CONFIG SITE
@@ -53,8 +52,9 @@ ATOM = "{%s}" % ATOMNS
 NSMAP = {None: HTMLNS}
 NSMAP2 = {None: ATOMNS}
 NSMAP3 = {'html': HTMLNS}
+NSMAP4 = {'html': ATOMNS}
 
-# CONFIG with cli (TODO)
+# CONFIG with cli
 STYLESHEET = "/2011/12/01/proto/style/article.css"
 STATUS = ""
 MAXFEEDITEM = 20
@@ -70,6 +70,7 @@ for processing text files for the site
 La Grange http://www.la-grange.net/.
 '''
 
+
 def parserawpost(rawpostpath):
     '''Given a path, parse an html file
     TODO check if the file is correct.
@@ -77,6 +78,7 @@ def parserawpost(rawpostpath):
     doc = html5parser.parse(rawpostpath).getroot()
     print "INFO: Document parsed"
     return doc
+
 
 def find_root(directory, token):
     """Find the root of a directory tree based on a token"""
@@ -86,7 +88,8 @@ def find_root(directory, token):
     # Create a list of the files in the current directory
     # If it fails the path doesn't exist
     try:
-        files_only = [ f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) ]
+        files_only = [f for f in os.listdir(directory)
+                      if os.path.isfile(os.path.join(directory, f))]
     except:
         return None
     # Check if the token is not among the files
@@ -199,7 +202,7 @@ def makefeedskeleton(websitetitle, tagline, feedtagid, lang, feedatomurl,
 
 def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
     '''create an individual Atom feed entry from a ready to be publish post'''
-    entry = Element('entry', nsmap=NSMAP2)
+    entry = Element('{http://www.w3.org/2005/Atom}entry', nsmap=NSMAP4)
     id = SubElement(entry, 'id')
     id.text = tagid
     linkfeedentry = SubElement(entry, 'link')
@@ -232,6 +235,7 @@ def createtagid(urlpath, isodate):
     tagid = "tag:%s,%s:%s" % (DOMAIN, isodate[0:10], urlpath.lstrip(SITE))
     return tagid
 
+
 def rfc3339_to_datetime(rfc3339_date_time):
     '''Simple rfc3339 converter. Incomplete because I know my format.
     Do not reuse elsewhere.
@@ -255,6 +259,7 @@ def rfc3339_to_datetime(rfc3339_date_time):
             # si - on doit ajouter le temps pour obtenir l'heure en UTC
             date_time += timedelta(hours=tz_hours, minutes=tz_minutes)
     return date_time
+
 
 def nowdate(date_time, format=""):
     '''Compute date in different formats I need'''
@@ -308,6 +313,7 @@ def update_home_index(feed_path, home_path):
     blog_ul = home.get_element_by_id("blog_index")
     blog_ul.getparent().replace(blog_ul, lis)
     return lxml.html.tostring(html, encoding='utf-8')
+
 
 def updatemonthlyindex(indexmarkup, monthindexpath):
     '''update the HTML Annual index with the feedendry'''
@@ -372,7 +378,6 @@ def updatearchivemap():
     pass
 
 
-
 def createmonthlyindex(indexmarkup):
     '''create a monthly index when it doesn't exist'''
     # Code ici pour lire un fichier avec des variables
@@ -396,6 +401,7 @@ def createmonthlyindex(indexmarkup):
         # need to write it on the filesystem.
         print result
 
+
 def createannualindex(year):
     '''create an annual index when it doesn't exist'''
     msg = "creating the annual index"
@@ -403,11 +409,12 @@ def createannualindex(year):
     with open(TEMPLATEDIR + 'index-year.html', 'r') as source:
         t = Template(source.read())
         datestring = nowdate(DATENOW, 'iso')
-        indexli = etree.tostring(
-            indexmarkup, pretty_print=True, encoding='utf-8')
+        indexli = etree.tostring(indexmarkup,
+                                 pretty_print=True, encoding='utf-8')
         result = t.substitute(year=datestring[:4], firstentry=indexli)
         # need to write it on the filesystem.
         print result
+
 
 def last_posts(feed_path):
     '''create a dictionary index of the last post using the Atom feed'''
@@ -427,12 +434,13 @@ def last_posts(feed_path):
     feed_entries = find_entry(feed_root)
     # We iterate through them
     for entry in feed_entries:
-        entry_data = {'title': find_title(entry)[0],
+        entry_data = {'title': find_title(entry)[0].encode('utf-8'),
                       'published': find_published(entry)[0],
                       'updated': find_updated(entry)[0],
                       'url': find_url(entry)[0]}
         entries.append(entry_data)
     return entries
+
 
 def last_posts_html(entries):
     '''Return the HTML markup for the last entries'''
@@ -443,11 +451,12 @@ def last_posts_html(entries):
         t = Template(source.read())
         for i, entry in enumerate(entries):
             updated = entry['updated']
-            hupdated = nowdate(rfc3339_to_datetime(updated), 'humain')
+            hupdated = nowdate(rfc3339_to_datetime(updated),
+                               'humain').decode('utf-8')
             published = entry['published']
             hpublished = nowdate(rfc3339_to_datetime(published), 'humain')
             last_posts_markup += t.substitute(
-                ttitle=entry['title'],
+                ttitle=entry['title'].decode('utf-8'),
                 turl=entry['url'],
                 tupdated=updated,
                 tupdated_human=hupdated,
@@ -505,7 +514,7 @@ def main():
 
     # INDEX MARKUP
     indexmarkup = createindexmarkup(postpath[:-5], created, title)
-    # print etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
+    print etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
     # Create the monthly index if it doesn't exist yet
     # Happen once a month
     if not os.path.isfile(monthindexpath):
@@ -513,15 +522,39 @@ def main():
 
     # FEED ENTRY MARKUP
     tagid = createtagid(posturl, created)
+    # TEST_BEGIN
+    parser = etree.XMLParser(ns_clean=True)
+    with open(feed_path, 'r') as source:
+        feed_tree = etree.parse(source, parser)
+    feed_root = feed_tree.getroot()
+    # Extract all tagid
+    find_entries = etree.ETXPath("//{%s}entry" % ATOMNS)
+    find_tagid = etree.ETXPath("{%s}id/text()" % ATOMNS)
+    for entry in find_entries(feed_root):
+        if find_tagid(entry)[0] == tagid:
+            print "FOUND"
+            feed_root.remove(entry)
+            break
+        else:
+            print "BOO"
+    # TEST_END
     feedentry = makefeedentry(
         posturl, tagid, title, created, nowdate(DATENOW, 'rfc3339'), content)
-    # print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
+    print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
+    # print etree.tostring(find_entries(feed_root)[0],
+    #                      pretty_print=True, encoding='utf-8')
+    # foobar = find_entries(feed_root)[0]
+    # foobar.addprevious(feedentry)
+    # print foobar
+    # print etree.tostring(find_entries(feed_root)[0],
+    #                      pretty_print=True, encoding='utf-8')
+    # print etree.tostring(find_entries(feed_root)[1],
+    #                      pretty_print=True, encoding='utf-8')
 
     # UPDATING HOME PAGE
     home_content = update_home_index(feed_path, home_path)
     with open(home_path, 'w') as home:
         home.write(home_content)
-
 
 
 if __name__ == "__main__":
