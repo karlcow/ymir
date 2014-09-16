@@ -8,18 +8,20 @@ Copyright (c) 2011 Grange. All rights reserved.
 see LICENSE.TXT
 '''
 
-import sys
-import os
-import locale
-from time import strftime, strptime
-from datetime import datetime, timedelta
 import argparse
-from lxml.html import html5parser
-import lxml.html
-from lxml import etree
-from lxml.etree import Element, SubElement
-from string import Template
+import datetime
+import locale
 import logging
+import os
+import string
+import sys
+
+from lxml import etree
+from lxml.etree import Element
+from lxml.etree import SubElement
+import lxml.html
+from lxml.html import html5parser
+from tracer import show_guts
 
 # CONFIG SITE
 DOMAIN = u"la-grange.net"
@@ -60,7 +62,7 @@ STATUS = ""
 MAXFEEDITEM = 20
 LICENSE = "ccby"
 
-DATENOW = datetime.today()
+DATENOW = datetime.datetime.today()
 
 # PATHS
 
@@ -72,25 +74,26 @@ La Grange http://www.la-grange.net/.
 
 
 def parserawpost(rawpostpath):
-    '''Given a path, parse an html file
+    '''Given a path, parse an html file.
+
     TODO check if the file is correct.
     '''
     doc = html5parser.parse(rawpostpath).getroot()
-    print "INFO: Document parsed"
+    print("INFO: Document parsed")
     return doc
 
 
 def find_root(directory, token):
-    """Find the root of a directory tree based on a token"""
+    """Find the root of a directory tree based on a token."""
     # Make sure we have a full path instead of a relative path
     if directory.startswith('.'):
-       directory = os.path.realpath(directory)
+        directory = os.path.realpath(directory)
     # Create a list of the files in the current directory
     # If it fails the path doesn't exist
     try:
         files_only = [f for f in os.listdir(directory)
                       if os.path.isfile(os.path.join(directory, f))]
-    except:
+    except Exception:
         return None
     # Check if the token is not among the files
     if token not in files_only:
@@ -105,11 +108,13 @@ def find_root(directory, token):
 # Extracting information from the blog posts
 
 
+@show_guts
 def getdocdate(doc, DATETYPE):
-    '''return the creation date of the document in ISO format YYYY-MM-DD
-    Input the document, typeofdate in between created and modified
+    '''return the creation date of the document in ISO format YYYY-MM-DD.
+
+    Input the document, typeofdate in between created and modified.
     '''
-    # TODO: check if the format is correct aka YYYY-MM-DD
+    # TODO(karl): check if the format is correct aka YYYY-MM-DD
     if DATETYPE not in DATETYPELIST:
         sys.exit("ERROR: No valid type for the date: " + DATETYPE)
     finddate = etree.ETXPath(
@@ -119,7 +124,7 @@ def getdocdate(doc, DATETYPE):
 
 
 def getcontent(doc):
-    '''return the full content of an article'''
+    '''return the full content of an article.'''
     findcontent = etree.ETXPath("//{%s}article" % HTMLNS)
     content = findcontent(doc)[0]
     # we want the content without the dates and the title
@@ -130,7 +135,7 @@ def getcontent(doc):
 
 
 def gettitle(doc):
-    '''return a list of markup and text being the title of the document'''
+    '''return a list of markup and text being the title of the document.'''
     findtitle = etree.ETXPath("//{%s}h1[text()]" % HTMLNS)
     if not findtitle(doc):
         sys.exit("ERROR: The document has no title")
@@ -140,74 +145,22 @@ def gettitle(doc):
     return titlemarkup, titletext
 
 
-def makeblogpost(doc):
-    '''create a blog post ready to be publish
-    from a raw or already published document'''
-    pass
+# def makeblogpost(doc):
+#     '''Create a blog post ready to be publish.
 
-
-def makefeedskeleton(websitetitle, tagline, feedtagid, lang, feedatomurl,
-                     site, license, faviconlink, authorname, authoruri):
-    '''create the feed skeleton for a specific Web site'''
-    feed = Element('feed')
-    feed.attrib['lang'] = lang
-
-    # Web site title
-    title = SubElement(feed, 'title')
-    title.text = websitetitle
-
-    # Tagline
-    subtitle = SubElement(feed, 'subtitle')
-    subtitle.text = tagline
-
-    # feedid
-    feedid = SubElement(feed, 'id')
-    feedid.text = feedtagid
-
-    # updated
-    updated = SubElement(feed, 'updated')
-
-    # link self atom
-    linkselfatom = SubElement(feed, 'link')
-    linkselfatom.attrib["rel"] = "self"
-    linkselfatom.attrib["type"] = "application/atom+xml"
-    linkselfatom.attrib["href"] = FEEDATOMURL
-
-    # link alternate blog
-    linkselfatom = SubElement(feed, 'link')
-    linkselfatom.attrib["rel"] = "alternate"
-    linkselfatom.attrib["type"] = "application/xhtml+xml"
-    linkselfatom.attrib["href"] = site
-
-    # link license
-    linkselfatom = SubElement(feed, 'link')
-    linkselfatom.attrib["rel"] = "license"
-    linkselfatom.attrib["href"] = license
-
-    # icon
-    icon = SubElement(feed, 'icon')
-    icon.text = faviconlink
-
-    # author
-    author = SubElement(feed, 'author')
-    name = SubElement(author, 'name')
-    name.text = authorname
-    # email = SubElement(author, 'email')
-    # email.text = FEEDEMAIL
-    uri = SubElement(author, 'uri')
-    uri.text = authoruri
-
-    return feed
+#     From a raw or already published document.
+#     '''
+#     pass
 
 
 def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
-    '''create an individual Atom feed entry from a ready to be publish post'''
+    '''Create an individual Atom feed entry from a ready to be publish post.'''
     entry = Element('{http://www.w3.org/2005/Atom}entry', nsmap=NSMAP4)
     id = SubElement(entry, 'id')
     id.text = tagid
     linkfeedentry = SubElement(entry, 'link')
     linkfeedentry.attrib["rel"] = "alternate"
-    # TODO: This should be probably on a case by case.
+    # TODO(karl): This should be probably on a case by case.
     linkfeedentry.attrib["type"] = "text/html"
     linkfeedentry.attrib["href"] = url
     title = SubElement(entry, 'title')
@@ -230,22 +183,27 @@ def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
 
 
 def createtagid(urlpath, isodate):
-    '''Create a unide tagid for a given blog post
-    tag:la-grange.net,2012-01-24:2012/01/24/silence'''
+    '''Create a unide tagid for a given blog post.
+
+    Example: tag:la-grange.net,2012-01-24:2012/01/24/silence
+    '''
     tagid = "tag:%s,%s:%s" % (DOMAIN, isodate[0:10], urlpath.lstrip(SITE))
     return tagid
 
 
 def rfc3339_to_datetime(rfc3339_date_time):
-    '''Simple rfc3339 converter. Incomplete because I know my format.
+    '''Simple rfc3339 converter.
+
+    Incomplete because I know my format.
     Do not reuse elsewhere.
     2014-04-04T23:59:00+09:00
-    2014-04-04T23:59:00Z'''
+    2014-04-04T23:59:00Z
+    '''
     # Extraire la date et le temps sans le fuseau
     # 2014-04-04T23:59:00+09:00 -> 2014-04-04T23:59:00
     date_time, offset = rfc3339_date_time[:19], rfc3339_date_time[19:]
     # convertir en objet datetime
-    date_time = datetime.strptime(date_time, "%Y-%m-%dT%H:%M:%S")
+    date_time = datetime.datetime.strptime(date_time, "%Y-%m-%dT%H:%M:%S")
     # extraire le fuseau horaire
     # 2014-04-04T23:59:00+09:00 -> +09:00
     # 2014-04-04T23:59:00Z      -> Z
@@ -254,15 +212,15 @@ def rfc3339_to_datetime(rfc3339_date_time):
         tz_hours, tz_minutes = int(offset[1:3]), int(offset[4:6])
         if '+' in offset:
             # si + on doit déduire le temps pour obtenir l'heure en UTC
-            date_time -= timedelta(hours=tz_hours, minutes=tz_minutes)
+            date_time -= datetime.timedelta(hours=tz_hours, minutes=tz_minutes)
         else:
             # si - on doit ajouter le temps pour obtenir l'heure en UTC
-            date_time += timedelta(hours=tz_hours, minutes=tz_minutes)
+            date_time += datetime.timedelta(hours=tz_hours, minutes=tz_minutes)
     return date_time
 
 
 def nowdate(date_time, format=""):
-    '''Compute date in different formats I need'''
+    '''Compute date in different date string formats.'''
     # date in French please
     my_locale = "fr_FR"
     locale.setlocale(locale.LC_ALL, my_locale)
@@ -287,17 +245,17 @@ def nowdate(date_time, format=""):
             dategeek = dategeek.lstrip('0')
         return date_time.strftime("%A ") + dategeek
     else:
-        print "wrong format"
+        print("wrong format")
         sys.exit(1)
 
 
-def updatefeed(feedentry):
-    '''Update the feed with the last individual feed entry'''
-    pass
+# def updatefeed(feedentry):
+#     '''Update the feed with the last individual feed entry.'''
+#     pass
 
 
 def update_home_index(feed_path, home_path):
-    '''update the HTML index with the feedendry content'''
+    '''Update the HTML index with the feedendry content.'''
     # Get HTML from the index
     if os.path.isfile(home_path):
         html = lxml.html.parse(home_path)
@@ -315,50 +273,81 @@ def update_home_index(feed_path, home_path):
     return lxml.html.tostring(html, encoding='utf-8')
 
 
+@show_guts
 def updatemonthlyindex(indexmarkup, monthindexpath):
-    '''update the HTML Annual index with the feedendry'''
-    print etree.tostring(indexmarkup, encoding="utf-8")
+    '''Update the HTML Annual index with the feedendry.'''
+    # print etree.tostring(indexmarkup, encoding="utf-8")
     # is there a monthly index.
     if os.path.isfile(monthindexpath):
-        monthlyindex = parserawpost(monthindexpath)
+        monthlyindex = lxml.html.parse(monthindexpath).getroot()
+        logging.info("Monthly Index exists")
     else:
-        # TODO
-        print "need to create index file"
+        logging.warn("Monthly index doesn’t exist. TOFIX")
+        # TODO(karl)
         createmonthlyindex(monthindexpath)
-    # grab the path and the modified date for the blog post
-    anchor = indexmarkup.xpath("/li/a")
-    newmodified = indexmarkup.xpath(
-        "/html:li/time[@class='modified']/text()",
-        namespaces={'html': 'http://www.w3.org/1999/xhtml'})[0]
-    link = anchor[0].get('href')
-    # check if the element is already in the list
-    findli = etree.ETXPath("//{%s}li/{%s}a" % (HTMLNS, HTMLNS))
-    fulllist = findli(monthlyindex)
-    ENDLIST = True
-    for item in fulllist:
-        # if yes replace it with the new one.
-        if item.get('href') == link:
-            ENDLIST = False
-            for timeelt in item.itersiblings(preceding=True):
-                if timeelt.get('class') == 'modified':
-                    timeelt.set('datetime', newmodified)
-                    timeelt.text = newmodified
-            return etree.tostring(monthlyindex, encoding="utf-8")
+    # grab the list of entry
+    findentrylist = etree.ETXPath("//section[@id='month-index']/ul/li")
+    entries = findentrylist(monthlyindex)
+    find_href = etree.ETXPath("a/@href")
+    find_created = etree.ETXPath("time/@datetime")
+    # find_title = etree.ETXPath("a/text()")
+    href_ref = find_href(indexmarkup)[0]
+    created_ref = find_created(indexmarkup)[0]
+    # title_ref = find_title(indexmarkup)[0]
 
-    if ENDLIST:
-        findul = etree.ETXPath("//{%s}ul" % HTMLNS)
-        ul = findul(monthlyindex)[0]
-        print ul
-        ul.append(indexmarkup)
-        print "Add markup at the end"
-        return etree.tostring(monthlyindex, encoding="utf-8")
+    for entry in entries:
+        href_entry = find_href(entry)[0]
+        created_entry = find_created(entry)[0]
+        print("ENTRY: ", created_entry, " TO ", created_ref)
+        if href_entry == href_ref:
+            print('same uri', href_entry)
+            # we check the date
+            # we check the title
+            # if changed replace
+        else:
+            pass
 
+    # index_string = etree.tostring(indexmarkup, encoding='utf-8').strip()
+    # monthlylist = [etree.tostring(entry_li, encoding='utf-8').strip()
+    #                for entry_li in monthlylist]
+    # if index_string in monthlylist:
+    #     print "YES IT IS. NO CHANGES NEEDED"
+    # else:
+    #     print "NEED TO INSERT THE STRING"
+
+    # print etree.tostring(indexmarkup, method='c14n')
+    # print find_href(indexmarkup)
+    #     # anchor = indexmarkup.xpath("/li/a")
+    # newmodified = indexmarkup.xpath(
+    #     "/html:li/time[@class='modified']/text()",
+    #     namespaces={'html': 'http://www.w3.org/1999/xhtml'})[0]
+    # link = anchor[0].get('href')
+    # # check if the element is already in the list
+    # findli = etree.ETXPath("//{%s}li/{%s}a" % (HTMLNS, HTMLNS))
+    # fulllist = findli(monthlyindex)
+    # ENDLIST = True
+    # for item in fulllist:
+    #     # if yes replace it with the new one.
+    #     if item.get('href') == link:
+    #         ENDLIST = False
+    #         for timeelt in item.itersiblings(preceding=True):
+    #             if timeelt.get('class') == 'modified':
+    #                 timeelt.set('datetime', newmodified)
+    #                 timeelt.text = newmodified
+    #         return etree.tostring(monthlyindex, encoding="utf-8")
+    # if ENDLIST:
+    #     findul = etree.ETXPath("//{%s}ul" % HTMLNS)
+    #     ul = findul(monthlyindex)[0]
+    #     print ul
+    #     ul.append(indexmarkup)
+    #     print "Add markup at the end"
+    #     return etree.tostring(monthlyindex, encoding="utf-8")
     # if NO add it to the end of the list?
     # hmmm what about if the date is not in order :)
 
 
 def createindexmarkup(postpath, created, title):
-    '''Create the Markup necessary to update the indexes'''
+    '''Create the Markup necessary to update the indexes.'''
     dcreated = {'class': 'created', 'datetime': created}
     # Creating the Markup
     # li = etree.Element("{%s}li" % HTMLNS, nsmap=NSMAP)
@@ -371,15 +360,17 @@ def createindexmarkup(postpath, created, title):
     return li
 
 
-def updatearchivemap():
-    '''update the archive map page for new months and/or new years.
-    not sure it is necessary. Manually is kind of cool with less
-    dependencies.'''
-    pass
+# def updatearchivemap():
+#     '''Update the archive map page for new months and/or new years.
+
+#     not sure it is necessary. Manually is kind of cool with less
+#     dependencies.
+#     '''
+#     pass
 
 
 def createmonthlyindex(indexmarkup):
-    '''create a monthly index when it doesn't exist'''
+    '''Create a monthly index when it doesn't exist.'''
     # Code ici pour lire un fichier avec des variables
     # substituer les variables par les valeurs du mois
     # sauver le fichier au bon endroit
@@ -387,7 +378,7 @@ def createmonthlyindex(indexmarkup):
     logging.info("%s" % (msg))
 
     with open(TEMPLATEDIR + 'index-mois.html', 'r') as source:
-        t = Template(source.read())
+        t = string.Template(source.read())
         datestring = nowdate(DATENOW, 'iso')
         datehumain = nowdate(DATENOW, 'humain')
         # to get month, we split in 3 the human date and take the second
@@ -399,25 +390,25 @@ def createmonthlyindex(indexmarkup):
                               year=datestring[:4], humandate=datehumain,
                               firstentry=indexli)
         # need to write it on the filesystem.
-        print result
+        print(result)
 
 
-def createannualindex(year):
-    '''create an annual index when it doesn't exist'''
-    msg = "creating the annual index"
-    logging.info("%s" % (msg))
-    with open(TEMPLATEDIR + 'index-year.html', 'r') as source:
-        t = Template(source.read())
-        datestring = nowdate(DATENOW, 'iso')
-        indexli = etree.tostring(indexmarkup,
-                                 pretty_print=True, encoding='utf-8')
-        result = t.substitute(year=datestring[:4], firstentry=indexli)
-        # need to write it on the filesystem.
-        print result
+# def createannualindex(year):
+#     '''Create an annual index when it doesn't exist.'''
+#     msg = "creating the annual index"
+#     logging.info("%s" % (msg))
+#     with open(TEMPLATEDIR + 'index-year.html', 'r') as source:
+#         t = string.Template(source.read())
+#         datestring = nowdate(DATENOW, 'iso')
+#         indexli = etree.tostring(indexmarkup,
+#                                  pretty_print=True, encoding='utf-8')
+#         result = t.substitute(year=datestring[:4], firstentry=indexli)
+#         # need to write it on the filesystem.
+#         print(result)
 
 
 def last_posts(feed_path):
-    '''create a dictionary index of the last post using the Atom feed'''
+    '''Create a dictionary index of the last post using the Atom feed.'''
     entries = []
     parser = etree.XMLParser(ns_clean=True)
     with open(feed_path, 'r') as source:
@@ -443,12 +434,12 @@ def last_posts(feed_path):
 
 
 def last_posts_html(entries):
-    '''Return the HTML markup for the last entries'''
+    '''Return the HTML markup for the last entries.'''
     # msg = "Generating HTML markup for last entries in the feed"
     # logging.info("%s" % (msg))
     last_posts_markup = ""
     with open(TEMPLATEDIR + 'last_posts.html', 'r') as source:
-        t = Template(source.read())
+        t = string.Template(source.read())
         for i, entry in enumerate(entries):
             updated = entry['updated']
             hupdated = nowdate(rfc3339_to_datetime(updated),
@@ -468,7 +459,7 @@ def last_posts_html(entries):
 
 
 def main():
-    '''The core task for processing a file for La Grange'''
+    '''The core task for processing a file for La Grange.'''
     # Logging File Configuration
     logging.basicConfig(filename='log-ymir.txt', level=logging.DEBUG,
                         format='%(asctime)s - %(levelname)s - %(message)s')
@@ -514,7 +505,7 @@ def main():
 
     # INDEX MARKUP
     indexmarkup = createindexmarkup(postpath[:-5], created, title)
-    print etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8')
+    print(etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8'))
     # Create the monthly index if it doesn't exist yet
     # Happen once a month
     if not os.path.isfile(monthindexpath):
@@ -532,15 +523,15 @@ def main():
     find_tagid = etree.ETXPath("{%s}id/text()" % ATOMNS)
     for entry in find_entries(feed_root):
         if find_tagid(entry)[0] == tagid:
-            print "FOUND"
+            print("FOUND")
             feed_root.remove(entry)
             break
         else:
-            print "BOO"
+            print("BOO")
     # TEST_END
     feedentry = makefeedentry(
         posturl, tagid, title, created, nowdate(DATENOW, 'rfc3339'), content)
-    print etree.tostring(feedentry, pretty_print=True, encoding='utf-8')
+    print(etree.tostring(feedentry, pretty_print=True, encoding='utf-8'))
     # print etree.tostring(find_entries(feed_root)[0],
     #                      pretty_print=True, encoding='utf-8')
     # foobar = find_entries(feed_root)[0]
@@ -555,7 +546,7 @@ def main():
     home_content = update_home_index(feed_path, home_path)
     with open(home_path, 'w') as home:
         home.write(home_content)
-
-
+    # UPDATING MONTHLY INDEX
+    updatemonthlyindex(indexmarkup, monthindexpath)
 if __name__ == "__main__":
     sys.exit(main())

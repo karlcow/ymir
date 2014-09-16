@@ -1,6 +1,6 @@
-from distutils.core import setup
+import distutils.core
 
-setup(
+distutils.core.setup(
     name='Ymir',
     author='Karl Dubost',
     author_email='karl+ymir@la-grange.net',
@@ -8,6 +8,6 @@ setup(
     packages=['ymir', ],
     license='LICENSE.txt',
     url='http://pypi.python.org/pypi/Ymir/',
-    description='script to manage the La Grange blog http://www.la-grange.net/',
+    description='script to manage La Grange blog http://www.la-grange.net/',
     long_description=open('README.txt').read(),
 )
