@@ -452,7 +452,7 @@ def last_posts_html(entries):
                 tupdated=updated,
                 tupdated_human=hupdated,
                 tpublished=published,
-                tpublished_human=hpublished)
+                tpublished_human=hpublished.decode('utf-8'))
     return last_posts_markup
 
 # MAIN
