@@ -83,6 +83,14 @@ def parserawpost(rawpostpath):
     return doc
 
 
+def parse_feed(feed_path):
+    '''Given the feed path, return a <type 'lxml.etree._Element'>.'''
+    parser = etree.XMLParser(ns_clean=True)
+    with open(feed_path, 'r') as source:
+        feed_tree = etree.parse(source, parser)
+    return feed_tree.getroot()
+
+
 def find_root(directory, token):
     """Find the root of a directory tree based on a token."""
     # Make sure we have a full path instead of a relative path
@@ -410,10 +418,7 @@ def createmonthlyindex(indexmarkup):
 def last_posts(feed_path):
     '''Create a dictionary index of the last post using the Atom feed.'''
     entries = []
-    parser = etree.XMLParser(ns_clean=True)
-    with open(feed_path, 'r') as source:
-        feed_tree = etree.parse(source, parser)
-    feed_root = feed_tree.getroot()
+    feed_root = parse_feed(feed_path)
     # Information we need: title, dates, link
     find_entry = etree.ETXPath("//{%s}entry" % ATOMNS)
     find_title = etree.ETXPath("{%s}title/text()" % ATOMNS)
@@ -514,10 +519,7 @@ def main():
     # FEED ENTRY MARKUP
     tagid = createtagid(posturl, created)
     # TEST_BEGIN
-    parser = etree.XMLParser(ns_clean=True)
-    with open(feed_path, 'r') as source:
-        feed_tree = etree.parse(source, parser)
-    feed_root = feed_tree.getroot()
+    feed_root = parse_feed(feed_path)
     # Extract all tagid
     find_entries = etree.ETXPath("//{%s}entry" % ATOMNS)
     find_tagid = etree.ETXPath("{%s}id/text()" % ATOMNS)
