@@ -54,7 +54,7 @@ ATOM = "{%s}" % ATOMNS
 NSMAP = {None: HTMLNS}
 NSMAP2 = {None: ATOMNS}
 NSMAP3 = {'html': HTMLNS}
-NSMAP4 = {'html': ATOMNS}
+NSMAP4 = {'atom': ATOMNS}
 
 # CONFIG with cli
 STYLESHEET = "/2011/12/01/proto/style/article.css"
@@ -88,7 +88,7 @@ def parse_feed(feed_path):
     parser = etree.XMLParser(ns_clean=True)
     with open(feed_path, 'r') as source:
         feed_tree = etree.parse(source, parser)
-    return feed_tree.getroot()
+    return feed_tree
 
 
 def find_root(directory, token):
@@ -163,9 +163,9 @@ def gettitle(doc):
 
 def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
     '''Create an individual Atom feed entry from a ready to be publish post.'''
-    entry = Element('{http://www.w3.org/2005/Atom}entry', nsmap=NSMAP4)
-    id = SubElement(entry, 'id')
-    id.text = tagid
+    entry = Element('{http://www.w3.org/2005/Atom}entry', nsmap=NSMAP2)
+    id_element = SubElement(entry, 'id')
+    id_element.text = tagid
     linkfeedentry = SubElement(entry, 'link')
     linkfeedentry.attrib["rel"] = "alternate"
     # TODO(karl): This should be probably on a case by case.
@@ -257,9 +257,63 @@ def nowdate(date_time, format=""):
         sys.exit(1)
 
 
-# def updatefeed(feedentry):
-#     '''Update the feed with the last individual feed entry.'''
-#     pass
+@show_guts
+def update_feed(feedentry, feed_path):
+    '''Update the feed with the last individual feed entry.
+
+    If the feedentry is in feed_root:
+        if updated dates are different,
+            replace it
+            save it
+        else
+            exit. No need for updates.
+    else:
+        add feedentry at the top of the feed.
+        remove the last feedentry.
+        save it.
+    '''
+    NEW_ENTRY = False
+    feed = parse_feed(feed_path)
+    from StringIO import StringIO
+    # temporary hack for dealing with the namespaces
+    feedentry = etree.parse(StringIO(etree.tostring(feedentry, encoding='utf-8')))
+    # XPath for finding tagid
+    find_entry = etree.ETXPath("//{%s}entry" % ATOMNS)
+    find_id = etree.ETXPath("{%s}id/text()" % ATOMNS)
+    find_date = etree.ETXPath("{%s}updated/text()" % ATOMNS)
+    # We need the information about the new entry
+    new_id = find_id(feedentry)[0]
+    new_updated = find_date(feedentry)[0]
+    # Processing and comparing
+    entries = find_entry(feed)
+    for entry in entries:
+        old_id = find_id(entry)[0]
+        old_updated = find_date(entry)[0]
+        if old_id == new_id:
+            if old_updated == new_updated:
+                logging.info("The feed has not changed.")
+                return None
+            else:
+                logging.info("The feed has been updated.")
+                # we remove from feed the specific entry
+                entry.getparent().remove(entry)
+                # Find the first entry element in the feed
+                position = feed.getroot().index(
+                    feed.find("//{%s}entry" % ATOMNS))
+                feed.getroot().insert(position, feedentry.getroot())
+                return feed
+    else:
+        logging.info("This is a new feed entry.")
+        NEW_ENTRY = True
+    if NEW_ENTRY:
+        print len(find_entry(feed))
+        entries[-1].getparent().remove(entries[-1])
+        print len(find_entry(feed))
+        position = feed.getroot().index(feed.find("//{%s}entry" % ATOMNS))
+        feed.getroot().insert(position, feedentry.getroot())
+        print len(find_entry(feed))
+        return feed
+    return None
 
 
 def update_home_index(feed_path, home_path):
@@ -519,30 +573,23 @@ def main():
     # FEED ENTRY MARKUP
     tagid = createtagid(posturl, created)
     # TEST_BEGIN
-    feed_root = parse_feed(feed_path)
-    # Extract all tagid
-    find_entries = etree.ETXPath("//{%s}entry" % ATOMNS)
-    find_tagid = etree.ETXPath("{%s}id/text()" % ATOMNS)
-    for entry in find_entries(feed_root):
-        if find_tagid(entry)[0] == tagid:
-            print("FOUND")
-            feed_root.remove(entry)
-            break
-        else:
-            print("BOO")
+    # feed_root = parse_feed(feed_path)
+    # # Extract all tagid
+    # find_entries = etree.ETXPath("//{%s}entry" % ATOMNS)
+    # find_tagid = etree.ETXPath("{%s}id/text()" % ATOMNS)
+    # for entry in find_entries(feed_root):
+    #     if find_tagid(entry)[0] == tagid:
+    #         print("FOUND")
+    #         feed_root.remove(entry)
+    #         break
+    #     else:
+    #         print("BOO")
     # TEST_END
+    # UPDATING FEED
     feedentry = makefeedentry(
         posturl, tagid, title, created, nowdate(DATENOW, 'rfc3339'), content)
     print(etree.tostring(feedentry, pretty_print=True, encoding='utf-8'))
-    # print etree.tostring(find_entries(feed_root)[0],
-    #                      pretty_print=True, encoding='utf-8')
-    # foobar = find_entries(feed_root)[0]
-    # foobar.addprevious(feedentry)
-    # print foobar
-    # print etree.tostring(find_entries(feed_root)[0],
-    #                      pretty_print=True, encoding='utf-8')
-    # print etree.tostring(find_entries(feed_root)[1],
-    #                      pretty_print=True, encoding='utf-8')
+    print(etree.tostring(update_feed(feedentry, feed_path), pretty_print=True, encoding='utf-8'))
 
     # UPDATING HOME PAGE
     home_content = update_home_index(feed_path, home_path)
