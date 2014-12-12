@@ -115,10 +115,7 @@ def find_root(directory, token):
     logging.info('find_root: The root is %s' % (directory))
     return directory
 
-# Extracting information from the blog posts
 
-
-@show_guts
 def getdocdate(doc, DATETYPE):
     '''return the creation date of the document in ISO format YYYY-MM-DD.
 
@@ -325,7 +322,6 @@ def update_home_index(feed_path, home_path):
     return lxml.html.tostring(html, encoding='utf-8')
 
 
-@show_guts
 def updatemonthlyindex(indexmarkup, monthindexpath):
     '''Update the HTML Annual index with the feedendry.'''
     # print etree.tostring(indexmarkup, encoding="utf-8")
@@ -335,7 +331,6 @@ def updatemonthlyindex(indexmarkup, monthindexpath):
         logging.info("Monthly Index exists")
     else:
         logging.warn("Monthly index doesn’t exist. TOFIX")
-        # TODO(karl)
         createmonthlyindex(monthindexpath)
     # grab the list of entry
     findentrylist = etree.ETXPath("//section[@id='month-index']/ul/li")
