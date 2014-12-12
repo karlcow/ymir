@@ -586,8 +586,9 @@ def main():
     feedentry = makefeedentry(
         posturl, tagid, title, created, nowdate(DATENOW, 'rfc3339'), content)
     print(etree.tostring(feedentry, pretty_print=True, encoding='utf-8'))
-    print(etree.tostring(update_feed(feedentry, feed_path), pretty_print=True, encoding='utf-8'))
-
+    feed_content = update_feed(feedentry, feed_path)
+    with open(feed_path_bkp, 'w') as feedbkp:
+        feedbkp.write(feed_content)
     # UPDATING HOME PAGE
     home_content = update_home_index(feed_path, home_path)
     with open(home_path, 'w') as home:
