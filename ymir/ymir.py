@@ -76,12 +76,10 @@ La Grange http://www.la-grange.net/.
 
 
 def parserawpost(rawpostpath):
-    '''Given a path, parse an html file.
-
-    TODO check if the file is correct.
-    '''
+    '''Given a path, parse an html file.'''
     doc = html5parser.parse(rawpostpath).getroot()
-    print("INFO: Document parsed")
+    # TODO: check if the file contains all the required information.
+    logging.info("parserrawpost: HTML document parsed")
     return doc
 
 
@@ -90,6 +88,7 @@ def parse_feed(feed_path):
     parser = etree.XMLParser(ns_clean=True)
     with open(feed_path, 'r') as source:
         feed_tree = etree.parse(source, parser)
+    logging.info("parse_feed: Feed has been parsed")
     return feed_tree
 
 
@@ -113,6 +112,7 @@ def find_root(directory, token):
         # Recursion with the upper directory
         newpath = os.path.realpath(directory + '/../')
         directory = find_root(newpath, token)
+    logging.info('find_root: The root is %s' % (directory))
     return directory
 
 # Extracting information from the blog posts
@@ -512,7 +512,7 @@ def main():
     # Logging File Configuration
     logging.basicConfig(filename='log-ymir.txt', level=logging.DEBUG,
                         format='%(asctime)s - %(levelname)s - %(message)s')
-
+    logging.info('-'*80)
     # Command Line Interface
     parser = argparse.ArgumentParser(
         description="Managing Web site blog posts")
