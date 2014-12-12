@@ -538,7 +538,13 @@ def main():
     # give the full URL of the blog post without the extension
     posturl = "%s%s" % (SITE[:-1], postpath[:-5])
     monthindexpath = monthabspath + "/index.html"
-
+    # preparing places for backup
+    BACKUP_PATH = '/tmp/lagrange'
+    if not os.path.isdir(BACKUP_PATH):
+        os.mkdir(BACKUP_PATH)
+    import shutil
+    feed_path_bkp = '%s/%s' % (BACKUP_PATH, FEEDATOMNOM)
+    shutil.copy(feed_path, feed_path_bkp)
     # PROCESSING
     # Parse the document
     rawpost = parserawpost(rawpostpath)
