@@ -15,6 +15,8 @@ import logging
 import os
 import string
 import sys
+from StringIO import StringIO
+
 
 from lxml import etree
 from lxml.etree import Element
@@ -257,25 +259,16 @@ def nowdate(date_time, format=""):
         sys.exit(1)
 
 
-@show_guts
 def update_feed(feedentry, feed_path):
     '''Update the feed with the last individual feed entry.
 
-    If the feedentry is in feed_root:
-        if updated dates are different,
-            replace it
-            save it
-        else
-            exit. No need for updates.
-    else:
-        add feedentry at the top of the feed.
-        remove the last feedentry.
-        save it.
+    * return None if nothing has changed
+    * add a new entry, delete the last if a new post
+    * add a new entry, remove the old entry if post has changed.
     '''
     NEW_ENTRY = False
     feed = parse_feed(feed_path)
-    from StringIO import StringIO
-    # temporary hack for dealing with the namespaces
+    # TODO: Fix the creation of feedentry to have proper namespaces
     feedentry = etree.parse(StringIO(etree.tostring(feedentry, encoding='utf-8')))
     # XPath for finding tagid
     find_entry = etree.ETXPath("//{%s}entry" % ATOMNS)
@@ -301,18 +294,16 @@ def update_feed(feedentry, feed_path):
                 position = feed.getroot().index(
                     feed.find("//{%s}entry" % ATOMNS))
                 feed.getroot().insert(position, feedentry.getroot())
-                return feed
+                return lxml.html.tostring(feed, encoding='utf-8')
     else:
         logging.info("This is a new feed entry.")
         NEW_ENTRY = True
+    # TODO: Fix the updated date of the feed.
     if NEW_ENTRY:
-        print len(find_entry(feed))
         entries[-1].getparent().remove(entries[-1])
-        print len(find_entry(feed))
         position = feed.getroot().index(feed.find("//{%s}entry" % ATOMNS))
         feed.getroot().insert(position, feedentry.getroot())
-        print len(find_entry(feed))
-        return feed
+        return lxml.html.tostring(feed, encoding='utf-8')
     return None
 
 
