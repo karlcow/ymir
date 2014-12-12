@@ -170,7 +170,6 @@ def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
     id_element.text = tagid
     linkfeedentry = SubElement(entry, 'link')
     linkfeedentry.attrib["rel"] = "alternate"
-    # TODO(karl): This should be probably on a case by case.
     linkfeedentry.attrib["type"] = "text/html"
     linkfeedentry.attrib["href"] = url
     title = SubElement(entry, 'title')
@@ -189,6 +188,8 @@ def makefeedentry(url, tagid, posttitle, created, modified, postcontent):
     linkselfatom = SubElement(entry, 'link', nsmap=NSMAP2)
     linkselfatom.attrib["rel"] = "license"
     linkselfatom.attrib["href"] = LICENSELIST['ccby']
+    entry = etree.parse(StringIO(etree.tostring(entry, encoding='utf-8')))
+    logging.info("makefeedentry: new entry created")
     return entry
 
 
@@ -268,8 +269,6 @@ def update_feed(feedentry, feed_path):
     '''
     NEW_ENTRY = False
     feed = parse_feed(feed_path)
-    # TODO: Fix the creation of feedentry to have proper namespaces
-    feedentry = etree.parse(StringIO(etree.tostring(feedentry, encoding='utf-8')))
     # XPath for finding tagid
     find_entry = etree.ETXPath("//{%s}entry" % ATOMNS)
     find_id = etree.ETXPath("{%s}id/text()" % ATOMNS)
