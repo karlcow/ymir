@@ -13,6 +13,7 @@ import datetime
 import locale
 import logging
 import os
+import shutil
 import string
 import sys
 from StringIO import StringIO
@@ -23,7 +24,7 @@ from lxml.etree import Element
 from lxml.etree import SubElement
 import lxml.html
 from lxml.html import html5parser
-from tracer import show_guts
+# from tracer import show_guts
 
 # CONFIG SITE
 DOMAIN = u"la-grange.net"
@@ -532,11 +533,11 @@ def main():
     # give the full URL of the blog post without the extension
     posturl = "%s%s" % (SITE[:-1], postpath[:-5])
     monthindexpath = monthabspath + "/index.html"
+    # BACKUPS?
     # preparing places for backup
     BACKUP_PATH = '/tmp/lagrange'
     if not os.path.isdir(BACKUP_PATH):
         os.mkdir(BACKUP_PATH)
-    import shutil
     feed_path_bkp = '%s/%s' % (BACKUP_PATH, FEEDATOMNOM)
     shutil.copy(feed_path, feed_path_bkp)
     # PROCESSING
