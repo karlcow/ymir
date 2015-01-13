@@ -521,6 +521,8 @@ def main():
     args = parser.parse_args()
     # Arguments attribution
     rawpostpath = args.rawpost[0]
+    # PATH CONFIGURATIONS
+    # Getting the path of the current post on the OS
     abspathpost = os.path.abspath(rawpostpath.name)
     post_directory = os.path.dirname(abspathpost)
     # Finding the root of the Web site
@@ -566,19 +568,6 @@ def main():
 
     # FEED ENTRY MARKUP
     tagid = createtagid(posturl, created)
-    # TEST_BEGIN
-    # feed_root = parse_feed(feed_path)
-    # # Extract all tagid
-    # find_entries = etree.ETXPath("//{%s}entry" % ATOMNS)
-    # find_tagid = etree.ETXPath("{%s}id/text()" % ATOMNS)
-    # for entry in find_entries(feed_root):
-    #     if find_tagid(entry)[0] == tagid:
-    #         print("FOUND")
-    #         feed_root.remove(entry)
-    #         break
-    #     else:
-    #         print("BOO")
-    # TEST_END
     # UPDATING FEED
     feedentry = makefeedentry(
         posturl, tagid, title, created, nowdate(DATENOW, 'rfc3339'), content)
