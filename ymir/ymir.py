@@ -291,6 +291,8 @@ def update_feed(feedentry, feed_path):
                 position = feed.getroot().index(
                     feed.find("//{%s}entry" % ATOMNS))
                 feed.getroot().insert(position, feedentry.getroot())
+                # Change the <updated> date of the feed
+                feed.find("//{%s}updated" % ATOMNS).text = new_updated
                 return lxml.html.tostring(feed, encoding='utf-8')
     else:
         logging.info("This is a new feed entry.")
@@ -300,6 +302,8 @@ def update_feed(feedentry, feed_path):
         entries[-1].getparent().remove(entries[-1])
         position = feed.getroot().index(feed.find("//{%s}entry" % ATOMNS))
         feed.getroot().insert(position, feedentry.getroot())
+        # Change the <updated> date of the feed
+        feed.find("//{%s}updated" % ATOMNS).text = new_updated
         return lxml.html.tostring(feed, encoding='utf-8')
     return None
 
@@ -512,26 +516,24 @@ def main():
     # Command Line Interface
     parser = argparse.ArgumentParser(
         description="Managing Web site blog posts")
-
     parser.add_argument('rawpost', metavar='FILE', help='file to be processed',
                         action='store', nargs=1, type=argparse.FileType('rt'))
     args = parser.parse_args()
     # Arguments attribution
     rawpostpath = args.rawpost[0]
-
-    # CONFIGURATION
-    # assets path
     abspathpost = os.path.abspath(rawpostpath.name)
-    # Find the root of the site
     post_directory = os.path.dirname(abspathpost)
+    # Finding the root of the Web site
     site_root = find_root(post_directory, ROOT_TOKEN)
-    # What are the paths?
-    monthabspath = os.path.dirname(os.path.dirname(abspathpost))
+    # Post path and full URL without ".html"
     postpath = abspathpost[len(site_root):]
-    feed_path = '%s/%s' % (site_root, FEEDATOMNOM)
-    home_path = '%s/%s' % (site_root, 'index.html')
-    # give the full URL of the blog post without the extension
     posturl = "%s%s" % (SITE[:-1], postpath[:-5])
+    # Feed
+    feed_path = '%s/%s' % (site_root, FEEDATOMNOM)
+    # Site Home Page
+    home_path = '%s/%s' % (site_root, 'index.html')
+    # Monthly index
+    monthabspath = os.path.dirname(os.path.dirname(abspathpost))
     monthindexpath = monthabspath + "/index.html"
     # BACKUPS?
     # preparing places for backup
