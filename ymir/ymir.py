@@ -297,7 +297,6 @@ def update_feed(feedentry, feed_path):
     else:
         logging.info("This is a new feed entry.")
         NEW_ENTRY = True
-    # TODO: Fix the updated date of the feed.
     if NEW_ENTRY:
         entries[-1].getparent().remove(entries[-1])
         position = feed.getroot().index(feed.find("//{%s}entry" % ATOMNS))
