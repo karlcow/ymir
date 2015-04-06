@@ -420,7 +420,7 @@ def createindexmarkup(postpath, created, title):
 #     pass
 
 
-def createmonthlyindex(indexmarkup):
+def createmonthlyindex(indexmarkup, monthindexpath):
     '''Create a monthly index when it doesn't exist.'''
     # Code ici pour lire un fichier avec des variables
     # substituer les variables par les valeurs du mois
@@ -437,11 +437,14 @@ def createmonthlyindex(indexmarkup):
         datemois = datehumain.split(' ')[1]
         indexli = etree.tostring(
             indexmarkup, pretty_print=True, encoding='utf-8')
-        result = t.substitute(isodateshort=datestring, monthname=datemois,
-                              year=datestring[:4], humandate=datehumain,
+        result = t.substitute(isodateshort=datestring,
+                              monthname=datemois,
+                              year=datestring[:4],
+                              humandate=datehumain,
                               firstentry=indexli)
         # need to write it on the filesystem.
-        print(result)
+    with open(monthindexpath, 'w') as monthindex:
+        monthindex.write(result)
 
 
 # def createannualindex(year):
@@ -559,11 +562,14 @@ def main():
 
     # INDEX MARKUP
     indexmarkup = createindexmarkup(postpath[:-5], created, title)
-    print(etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8'))
     # Create the monthly index if it doesn't exist yet
     # Happen once a month
     if not os.path.isfile(monthindexpath):
-        createmonthlyindex(indexmarkup)
+        createmonthlyindex(indexmarkup, monthindexpath)
+    else:
+        # TOFIX: updating the monthly index
+        # updatemonthlyindex(indexmarkup, monthindexpath)
+        print(etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8'))
 
     # FEED ENTRY MARKUP
     tagid = createtagid(posturl, created)
