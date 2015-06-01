@@ -10,14 +10,13 @@ see LICENSE.TXT
 
 import argparse
 import datetime
-import locale
 import logging
 import os
 import shutil
 import string
 import sys
 from StringIO import StringIO
-
+from utils import nowdate
 
 from lxml import etree
 from lxml.etree import Element
@@ -226,36 +225,6 @@ def rfc3339_to_datetime(rfc3339_date_time):
             # si - on doit ajouter le temps pour obtenir l'heure en UTC
             date_time += datetime.timedelta(hours=tz_hours, minutes=tz_minutes)
     return date_time
-
-
-def nowdate(date_time, format=""):
-    '''Compute date in different date string formats.'''
-    # date in French please
-    my_locale = "fr_FR"
-    locale.setlocale(locale.LC_ALL, my_locale)
-    if format == "rfc3339":
-        return date_time.strftime("%Y-%m-%dT%H:%M:%SZ")
-    elif format == "iso":
-        return date_time.strftime("%Y-%m-%d")
-    elif format == "path":
-        return date_time.strftime("%Y/%m/%d")
-    elif format == "humain":
-        # remove the leading 0 of the date
-        dategeek = date_time.strftime("%d %B %Y")
-        if dategeek.startswith('0'):
-            dategeek = dategeek.lstrip('0')
-        return dategeek
-    elif format == "humainlong":
-        # Remove the leading 0
-        # And add the day of the week
-        # "Vendredi "+ "3 février 2012"
-        dategeek = date_time.strftime("%d %B %Y")
-        if dategeek.startswith('0'):
-            dategeek = dategeek.lstrip('0')
-        return date_time.strftime("%A ") + dategeek
-    else:
-        print("wrong format")
-        sys.exit(1)
 
 
 def update_feed(feedentry, feed_path):
