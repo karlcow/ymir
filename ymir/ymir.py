@@ -174,7 +174,7 @@ def makefeedentry(feedentry_data):
     linkfeedentry.attrib["type"] = "text/html"
     linkfeedentry.attrib["href"] = feedentry_data['url']
     title = SubElement(entry, 'title')
-    title.text = feedentry_data['posttitle']
+    title.text = feedentry_data['title']
     published = SubElement(entry, 'published')
     published.text = feedentry_data['created']
     updated = SubElement(entry, 'updated')
@@ -185,7 +185,7 @@ def makefeedentry(feedentry_data):
     # so only the local root element (div) will get the namespace
     divcontent = SubElement(content, "{%s}div" % HTMLNS, nsmap=NSMAP)
     # Adding a full tree fragment.
-    divcontent.append(feedentry_data['postcontent'])
+    divcontent.append(feedentry_data['content'])
     linkselfatom = SubElement(entry, 'link', nsmap=NSMAP2)
     linkselfatom.attrib["rel"] = "license"
     linkselfatom.attrib["href"] = LICENSELIST['ccby']
@@ -293,14 +293,15 @@ def update_home_index(feed_path, home_path, id_name):
     # Get an entry dictionary from the Feed
     entries = last_posts(feed_path)
     # Generate string with markup
-    home_template = u"""<ul id="{id}">
+    home_template = """<ul id="{id}">
     {posts_list}
     </ul>
-    """.encode('utf-8')
+    """
+    posts_list = last_posts_html(entries)
     home_index = home_template.format(
         id=id_name,
-        posts_list=last_posts_html(entries))
-    lis = lxml.html.fragment_fromstring(home_index)
+        posts_list=posts_list)
+    lis = lxml.html.fragment_fromstring(home_index.decode('utf-8'))
     # replace the content of the home index
     blog_ul = home.get_element_by_id(id_name)
     blog_ul.getparent().replace(blog_ul, lis)
@@ -417,10 +418,10 @@ def last_posts_html(entries):
     """Return the HTML markup for the last entries."""
     # msg = "Generating HTML markup for last entries in the feed"
     # logging.info("%s" % (msg))
-    last_posts_markup = ""
+    last_posts_markup = ''
     with open(TEMPLATEDIR + 'last_posts.html', 'r') as source:
         t = string.Template(source.read())
-        for i, entry in enumerate(entries):
+        for entry in entries:
             published = entry['published']
             tshortdate = published[:10]
             last_posts_markup += t.substitute(
@@ -486,6 +487,7 @@ def main():
 
     # INDEX MARKUP
     indexmarkup = createindexmarkup(postpath[:-5], created, title)
+    print(indexmarkup)
     # Create the monthly index if it doesn't exist yet
     # Happen once a month
     if not os.path.isfile(monthindexpath):
@@ -498,7 +500,7 @@ def main():
     # FEED ENTRY MARKUP
     tagid = createtagid(posturl, created)
     # UPDATING FEED
-    feedentry_data = {'posturl': posturl,
+    feedentry_data = {'url': posturl,
                       'tagid': tagid,
                       'title': title,
                       'created': created,
@@ -511,9 +513,8 @@ def main():
             feedbkp.write(feed_content)
     # UPDATING HOME PAGE
     home_content = update_home_index(feed_path, home_path, 'posts_list')
-    print(home_content.encode('utf-8'))
-    # with open(home_path, 'w') as home:
-    #     home.write(home_content)
+    with open(home_path, 'w') as home:
+        home.write(home_content)
     # UPDATING MONTHLY INDEX
     # updatemonthlyindex(indexmarkup, monthindexpath)
 

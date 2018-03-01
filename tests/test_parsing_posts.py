@@ -35,6 +35,7 @@ class TestYmirParsing(unittest.TestCase):
         title_tests = [
             (u'What about 森野?', 'title-utf8.html'),
             (u'Simple title', 'title-markup.html'),
+            (u'Simple title', 'title-space.html'),
             (u'Simple title', 'title-simple.html')]
         for expected, filename in title_tests:
             doc = self.read_fixture(filename)
