@@ -428,7 +428,13 @@ def main():
         description="Managing Web site blog posts")
     parser.add_argument('rawpost', metavar='FILE', help='file to be processed',
                         action='store', nargs=1, type=argparse.FileType('rt'))
+    parser.add_argument('-t', '--testmode', action='store_true',
+                        help='Run ymir without writing files.')
     args = parser.parse_args()
+    # Mode for testing the code without destroying the files
+    dryrun = False
+    if args.testmode:
+        dryrun = True
     # Arguments attribution
     rawpostpath = args.rawpost[0]
     # PATH CONFIGURATIONS
@@ -470,7 +476,6 @@ def main():
 
     # INDEX MARKUP
     indexmarkup = createindexmarkup(postpath[:-5], created, title)
-    print(indexmarkup)
     # Create the monthly index if it doesn't exist yet
     # Happen once a month
     if not os.path.isfile(monthindexpath):
@@ -492,12 +497,18 @@ def main():
     feedentry = makefeedentry(feedentry_data)
     feed_content = update_feed(feedentry, feed_path_bkp)
     if feed_content:
-        with open(feed_path, 'w') as feedbkp:
-            feedbkp.write(feed_content)
+        if not dryrun:
+            with open(feed_path, 'w') as feedbkp:
+                feedbkp.write(feed_content)
+        else:
+            print('TESTING: feedbkp.write(feed_content)')
     # UPDATING HOME PAGE
     home_content = update_home_index(feed_path, home_path, 'posts_list')
-    with open(home_path, 'w') as home:
-        home.write(home_content)
+    if not dryrun:
+        with open(home_path, 'w') as home:
+            home.write(home_content)
+    else:
+        print('TESTING: home.write(home_content)')
     # UPDATING MONTHLY INDEX
     # updatemonthlyindex(indexmarkup, monthindexpath)
 
