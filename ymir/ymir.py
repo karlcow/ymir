@@ -25,6 +25,8 @@ import lxml.html
 from lxml.html import html5parser
 
 from utils import helper
+from utils import parsing
+
 # from tracer import show_guts
 
 # CONFIG SITE
@@ -143,25 +145,6 @@ def getcontent(doc):
     header = findheader(content)[0]
     content.remove(header)
     return content
-
-
-def gettitle(doc):
-    """Return a list of markup and text being the title of the document."""
-    findtitle = etree.ETXPath("//{%s}h1[text()]" % HTMLNS)
-    if not findtitle(doc):
-        sys.exit("ERROR: The document has no title")
-    title = findtitle(doc)[0]
-    titlemarkup = etree.tostring(title, encoding="utf-8")
-    titletext = etree.tostring(title, encoding="utf-8", method="text")
-    return titlemarkup, titletext
-
-
-# def makeblogpost(doc):
-#     """Create a blog post ready to be publish.
-
-#     From a raw or already published document.
-#     """
-#     pass
 
 
 def makefeedentry(feedentry_data):
@@ -475,7 +458,7 @@ def main():
     # Parse the document
     rawpost = parserawpost(rawpostpath)
     # Extracting Post Information
-    titlemarkup, title = gettitle(rawpost)
+    title = parsing.get_title(rawpost)
     title = title.decode("utf-8").strip()
     logging.info("TITLE: %s" % (title))
     created = getdocdate(rawpost, 'created')
