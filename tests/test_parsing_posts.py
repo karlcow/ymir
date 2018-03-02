@@ -41,3 +41,16 @@ class TestYmirParsing(unittest.TestCase):
             doc = self.read_fixture(filename)
             actual = parsing.get_title(doc)
             self.assertEqual(expected, actual)
+
+    def test_get_date(self):
+        """Test the extraction of the date."""
+        doc = self.read_fixture('date-created-modified.html')
+        created = parsing.get_date(doc, 'created')
+        self.assertEqual('2018-03-01T15:54:34+01:00', created)
+        modified = parsing.get_date(doc, 'modified')
+        self.assertEqual('2018-03-02T15:54:34+01:00', modified)
+        with self.assertRaises(ValueError) as ctx:
+            parsing.get_date(doc, 'foobar')
+        self.assertEqual(
+            ctx.exception.message,
+            "date type must be one of ['modified', 'created']")
