@@ -39,3 +39,18 @@ def get_title(doc):
     titletext = etree.tostring(title, encoding="utf-8", method="text")
     titletext = titletext.strip()
     return titletext.decode('utf-8')
+
+
+def get_date(doc, date_type):
+    """Return the creation date of the document in ISO format YYYY-MM-DD.
+
+    Input the document, typeofdate in between created and modified.
+    """
+    date_types = ['modified', 'created']
+    if date_type not in date_types:
+        raise ValueError("date type must be one of {valid_types}".format(
+            valid_types=date_types))
+    finddate = etree.ETXPath(
+        "string(//{%s}time[@class=%r]/@datetime)" % (HTMLNS, date_type))
+    date = finddate(doc)
+    return date

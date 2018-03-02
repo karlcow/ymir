@@ -123,19 +123,6 @@ def find_root(directory, token):
     return directory
 
 
-def getdocdate(doc, DATETYPE):
-    """Return the creation date of the document in ISO format YYYY-MM-DD.
-
-    Input the document, typeofdate in between created and modified.
-    """
-    if DATETYPE not in DATETYPELIST:
-        sys.exit("ERROR: No valid type for the date: " + DATETYPE)
-    finddate = etree.ETXPath(
-        "string(//{%s}time[@class=%r]/@datetime)" % (HTMLNS, DATETYPE))
-    date = finddate(doc)
-    return date
-
-
 def getcontent(doc):
     """Return the full content of an article."""
     findcontent = etree.ETXPath("//{%s}article" % HTMLNS)
@@ -467,9 +454,9 @@ def main():
     title = parsing.get_title(rawpost)
     title = title.decode("utf-8").strip()
     logging.info("TITLE: %s" % (title))
-    created = getdocdate(rawpost, 'created')
+    created = parsing.get_date(rawpost, 'created')
     logging.info("CREATED: %s" % (created))
-    modified = getdocdate(rawpost, 'modified')
+    modified = parsing.get_date(rawpost, 'modified')
     DATENOW = rfc3339_to_datetime(modified)
     logging.info("MODIFIED: %s" % (modified))
     content = getcontent(rawpost)
