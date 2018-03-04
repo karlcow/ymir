@@ -54,3 +54,20 @@ def get_date(doc, date_type):
         "string(//{%s}time[@class=%r]/@datetime)" % (HTMLNS, date_type))
     date = finddate(doc)
     return date
+
+
+def get_content(doc):
+    """Return the full content of an article."""
+    findcontent = etree.ETXPath("//{%s}article" % HTMLNS)
+    try:
+        content = findcontent(doc)[0]
+    except IndexError as e:
+        raise IndexError('Ooops. No article.')
+    # We want the content without the dates and the title
+    findheader = etree.ETXPath("//{%s}header" % HTMLNS)
+    try:
+        header = findheader(content)[0]
+        content.remove(header)
+    except IndexError as e:
+        logging.info('No header inside article: {e}'.format(e=e))
+    return content

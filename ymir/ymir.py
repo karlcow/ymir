@@ -123,17 +123,6 @@ def find_root(directory, token):
     return directory
 
 
-def getcontent(doc):
-    """Return the full content of an article."""
-    findcontent = etree.ETXPath("//{%s}article" % HTMLNS)
-    content = findcontent(doc)[0]
-    # we want the content without the dates and the title
-    findheader = etree.ETXPath("//{%s}header" % HTMLNS)
-    header = findheader(content)[0]
-    content.remove(header)
-    return content
-
-
 def makefeedentry(feedentry_data):
     """Create an individual Atom feed entry from a ready to be publish post."""
     entry = Element('{http://www.w3.org/2005/Atom}entry', nsmap=NSMAP2)
@@ -459,7 +448,7 @@ def main():
     modified = parsing.get_date(rawpost, 'modified')
     DATENOW = rfc3339_to_datetime(modified)
     logging.info("MODIFIED: %s" % (modified))
-    content = getcontent(rawpost)
+    content = parsing.get_content(rawpost)
 
     # INDEX MARKUP
     indexmarkup = createindexmarkup(postpath[:-5], created, title)
