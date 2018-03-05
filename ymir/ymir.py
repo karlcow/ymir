@@ -22,7 +22,6 @@ from lxml import etree
 from lxml.etree import Element
 from lxml.etree import SubElement
 import lxml.html
-from lxml.html import html5parser
 
 from utils import helper
 from utils import parsing
@@ -81,22 +80,6 @@ This script has been entirely created
 for processing text files for the site
 La Grange http://www.la-grange.net/.
 """
-
-
-def parserawpost(rawpostpath):
-    """Given a path, parse an html file."""
-    doc = html5parser.parse(rawpostpath).getroot()
-    logging.info("parserrawpost: HTML document parsed")
-    return doc
-
-
-def parse_feed(feed_path):
-    """Given the feed path, return a <type 'lxml.etree._Element'>."""
-    parser = etree.XMLParser(ns_clean=True)
-    with open(feed_path, 'r') as source:
-        feed_tree = etree.parse(source, parser)
-    logging.info("parse_feed: Feed has been parsed")
-    return feed_tree
 
 
 def find_root(directory, token):
@@ -198,7 +181,7 @@ def update_feed(feedentry, feed_path):
     * add a new entry, remove the old entry if post has changed.
     """
     NEW_ENTRY = False
-    feed = parse_feed(feed_path)
+    feed = helper.parse_feed(feed_path)
     # XPath for finding tagid
     find_entry = etree.ETXPath("//{%s}entry" % ATOMNS)
     find_id = etree.ETXPath("{%s}id/text()" % ATOMNS)
@@ -314,15 +297,6 @@ def createindexmarkup(postpath, created, title):
     return li
 
 
-# def updatearchivemap():
-#     """Update the archive map page for new months and/or new years.
-
-#     not sure it is necessary. Manually is kind of cool with less
-#     dependencies.
-#     """
-#     pass
-
-
 def createmonthlyindex(indexmarkup, monthindexpath):
     """Create a monthly index when it doesn't exist."""
     # Code ici pour lire un fichier avec des variables
@@ -353,7 +327,7 @@ def createmonthlyindex(indexmarkup, monthindexpath):
 def last_posts(feed_path):
     """Create a dictionary index of the last post using the Atom feed."""
     entries = []
-    feed_root = parse_feed(feed_path)
+    feed_root = helper.parse_feed(feed_path)
     # Information we need: title, dates, link
     find_entry = etree.ETXPath("//{%s}entry" % ATOMNS)
     find_title = etree.ETXPath("{%s}title/text()" % ATOMNS)
@@ -412,10 +386,10 @@ def main():
     if args.testmode:
         dryrun = True
     # Arguments attribution
-    rawpostpath = args.rawpost[0]
+    raw_post_path = args.rawpost[0]
     # PATH CONFIGURATIONS
     # Getting the path of the current post on the OS
-    abspathpost = os.path.abspath(rawpostpath.name)
+    abspathpost = os.path.abspath(raw_post_path.name)
     post_directory = os.path.dirname(abspathpost)
     # Finding the root of the Web site
     site_root = find_root(post_directory, ROOT_TOKEN)
@@ -438,10 +412,10 @@ def main():
     shutil.copy(feed_path, feed_path_bkp)
     # PROCESSING
     # Parse the document
-    rawpost = parserawpost(rawpostpath)
+    rawpost = helper.parse_raw_post(raw_post_path)
     # Extracting Post Information
     title = parsing.get_title(rawpost)
-    title = title.decode("utf-8").strip()
+    title = title.strip()
     logging.info("TITLE: %s" % (title))
     created = parsing.get_date(rawpost, 'created')
     logging.info("CREATED: %s" % (created))

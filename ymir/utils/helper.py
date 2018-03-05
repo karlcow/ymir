@@ -8,8 +8,12 @@ see LICENSE.TXT
 """
 
 import locale
+import logging
 import os
 import sys
+
+from lxml import etree
+from lxml.html import html5parser
 
 
 ROOT = '/Users/karl/Sites/la-grange.net/'
@@ -47,3 +51,19 @@ def nowdate(date_time, format=""):
     else:
         print("wrong format")
         sys.exit(1)
+
+
+def parse_raw_post(raw_post_path):
+    """Given a path, parse an html file."""
+    doc = html5parser.parse(raw_post_path).getroot()
+    logging.info("parserrawpost: HTML document parsed")
+    return doc
+
+
+def parse_feed(feed_path):
+    """Given the feed path, return a <type 'lxml.etree._Element'>."""
+    parser = etree.XMLParser(ns_clean=True)
+    with open(feed_path, 'r') as source:
+        feed_tree = etree.parse(source, parser)
+    logging.info("parse_feed: Feed has been parsed")
+    return feed_tree
