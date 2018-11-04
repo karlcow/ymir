@@ -251,9 +251,8 @@ def update_home_index(feed_path, home_path, id_name):
 
 
 def updatemonthlyindex(indexmarkup, monthindexpath):
-    """Update the HTML Annual index with the feedendry."""
-    # print etree.tostring(indexmarkup, encoding="utf-8")
-    # is there a monthly index.
+    """Update the HTML monthly index with the feedendry."""
+    # Looking for a monthly index
     if os.path.isfile(monthindexpath):
         monthlyindex = lxml.html.parse(monthindexpath).getroot()
         logging.info("Monthly Index exists")
@@ -263,24 +262,45 @@ def updatemonthlyindex(indexmarkup, monthindexpath):
     # grab the list of entry
     findentrylist = etree.ETXPath("//section[@id='month-index']/ul/li")
     entries = findentrylist(monthlyindex)
+    # search
     find_href = etree.ETXPath("a/@href")
     find_created = etree.ETXPath("time/@datetime")
-    # find_title = etree.ETXPath("a/text()")
+    find_title = etree.ETXPath("a/text()")
+    # Reference
     href_ref = find_href(indexmarkup)[0]
     created_ref = find_created(indexmarkup)[0]
-    # title_ref = find_title(indexmarkup)[0]
-
+    title_ref = find_title(indexmarkup)[0]
+    entry_ref = {
+        'href': href_ref,
+        'created': created_ref,
+        'title': title_ref}
+    print(entry_ref)
+    # Index data
+    monthly_entries = []
     for entry in entries:
         href_entry = find_href(entry)[0]
-        created_entry = find_created(entry)[0]
-        print("ENTRY: ", created_entry, " TO ", created_ref)
+        # same URI, entry already exists, we stop.
         if href_entry == href_ref:
-            print('same uri', href_entry)
-            # we check the date
-            # we check the title
-            # if changed replace
-        else:
-            pass
+            return False
+        created_entry = find_created(entry)[0]
+        title_entry = find_title(entry)[0]
+        entry_data = {
+            'href': href_entry,
+            'created': created_entry,
+            'title': title_entry}
+        monthly_entries.append(entry_data)
+    sorted_entries = sorted(monthly_entries,
+                            key=lambda entry: entry['created'])
+    LI_TEMPLATE = u'<li><time class="created" datetime="{date}">{date_short}</time> : <a href="{href}">{title}</a></li>'  # noqa
+    html_markup = [
+        LI_TEMPLATE.format(
+            date=entry['created'],
+            date_short=entry['created'][:10],
+            href=entry['href'],
+            title=entry['title']
+            )
+        for entry in monthly_entries]
+    return '\n'.join(html_markup)
 
 
 def createindexmarkup(postpath, created, title):
@@ -432,8 +452,22 @@ def main():
         createmonthlyindex(indexmarkup, monthindexpath)
     else:
         # TOFIX: updating the monthly index
-        # updatemonthlyindex(indexmarkup, monthindexpath)
-        print(etree.tostring(indexmarkup, pretty_print=True, encoding='utf-8'))
+        if not dryrun:
+            html_markup = updatemonthlyindex(indexmarkup, monthindexpath)
+            print('WE should write to the index')
+            print(html_markup)
+            print(etree.tostring(
+                indexmarkup, pretty_print=True, encoding='utf-8'))
+        else:
+            print('TESTING - This would be written:')
+            html_markup = updatemonthlyindex(indexmarkup, monthindexpath)
+            if not html_markup:
+                print('nothing to write. Index is already up to date')
+            else:
+                print(html_markup)
+            print('-'*80)
+            print(etree.tostring(
+                indexmarkup, pretty_print=True, encoding='utf-8'))
 
     # FEED ENTRY MARKUP
     tagid = createtagid(posturl, created)
@@ -461,6 +495,7 @@ def main():
         print('TESTING: home.write(home_content)')
     # UPDATING MONTHLY INDEX
     # updatemonthlyindex(indexmarkup, monthindexpath)
+
 
 if __name__ == "__main__":
     sys.exit(main())
