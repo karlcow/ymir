@@ -10,7 +10,7 @@ see LICENSE.TXT
 import locale
 import logging
 import os
-import sys
+import urlparse
 
 from lxml import etree
 from lxml.html import html5parser
@@ -23,7 +23,7 @@ BLOGPOST_LIST_PATH = '2014/12/01/grange-blogpost.uri'
 BLOGPOST_LIST_URI = os.path.join(ROOT, BLOGPOST_LIST_PATH)
 
 
-def nowdate(date_time, format=""):
+def convert_date(date_time, format=""):
     """Compute date in different date string formats."""
     # date in French please
     my_locale = "fr_FR"
@@ -49,8 +49,8 @@ def nowdate(date_time, format=""):
             dategeek = dategeek.lstrip('0')
         return date_time.strftime("%A ") + dategeek
     else:
-        print("wrong format")
-        sys.exit(1)
+        logging.error("date format is wrong. Check convert_date.")
+        return None
 
 
 def parse_raw_post(raw_post_path):
@@ -67,3 +67,44 @@ def parse_feed(feed_path):
         feed_tree = etree.parse(source, parser)
     logging.info("parse_feed: Feed has been parsed")
     return feed_tree
+
+
+def create_tagid(post_url, iso_date):
+    """Create a unide tagid for a given blog post.
+
+    Example: tag:la-grange.net,2012-01-24:2012/01/24/silence
+    """
+    url_parts = urlparse.urlsplit(post_url)
+    domain = url_parts.hostname
+    # In la-grange case , we remove the www.
+    # This might break elsewhere.
+    domain = domain.lstrip('www.')
+    path = url_parts.path.lstrip('/')
+    tagid = 'tag:{domain},{iso_date}:{path}'.format(
+        domain=domain,
+        iso_date=iso_date,
+        path=path)
+    return tagid
+
+
+def find_root(directory, token):
+    """Find the root of a directory tree based on a token."""
+    # Make sure we have a full path instead of a relative path
+    if directory.startswith('.'):
+        directory = os.path.realpath(directory)
+    # Create a list of the files in the current directory
+    # If it fails the path doesn't exist
+    try:
+        files_only = [f for f in os.listdir(directory)
+                      if os.path.isfile(os.path.join(directory, f))]
+    except Exception:
+        return None
+    # Check if the token is not among the files
+    if token not in files_only:
+        # if '/', we are at the filesystem root
+        if directory == '/':
+            return None
+        # Recursion with the upper directory
+        newpath = os.path.realpath(directory + '/../')
+        directory = find_root(newpath, token)
+    return directory

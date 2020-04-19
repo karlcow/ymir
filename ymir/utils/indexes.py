@@ -34,8 +34,8 @@ def createmonthlyindex(indexmarkup, monthindexpath):
 
     with open(TEMPLATEDIR + 'index-mois.html', 'r') as source:
         t = string.Template(source.read())
-        datestring = helper.nowdate(DATENOW, 'iso')
-        datehumain = helper.nowdate(DATENOW, 'humain')
+        datestring = helper.convert_date(DATENOW, 'iso')
+        datehumain = helper.convert_date(DATENOW, 'humain')
         # to get month, we split in 3 the human date and take the second
         # argument
         datemois = datehumain.split(' ')[1]

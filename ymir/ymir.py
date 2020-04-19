@@ -71,7 +71,7 @@ STATUS = ""
 MAXFEEDITEM = 20
 LICENSE = "ccby"
 
-DATENOW = datetime.datetime.today()
+date_now = datetime.datetime.today()
 
 # PATHS
 
@@ -82,32 +82,9 @@ La Grange http://www.la-grange.net/.
 """
 
 
-def find_root(directory, token):
-    """Find the root of a directory tree based on a token."""
-    # Make sure we have a full path instead of a relative path
-    if directory.startswith('.'):
-        directory = os.path.realpath(directory)
-    # Create a list of the files in the current directory
-    # If it fails the path doesn't exist
-    try:
-        files_only = [f for f in os.listdir(directory)
-                      if os.path.isfile(os.path.join(directory, f))]
-    except Exception:
-        return None
-    # Check if the token is not among the files
-    if token not in files_only:
-        # if '/', we are at the filesystem root
-        if directory == '/':
-            return None
-        # Recursion with the upper directory
-        newpath = os.path.realpath(directory + '/../')
-        directory = find_root(newpath, token)
-    logging.info('find_root: The root is %s' % (directory))
-    return directory
-
-
 def makefeedentry(feedentry_data):
     """Create an individual Atom feed entry from a ready to be publish post."""
+    print(feedentry_data)
     entry = Element('{http://www.w3.org/2005/Atom}entry', nsmap=NSMAP2)
     id_element = SubElement(entry, 'id')
     id_element.text = feedentry_data['tagid']
@@ -131,18 +108,15 @@ def makefeedentry(feedentry_data):
     linkselfatom = SubElement(entry, 'link', nsmap=NSMAP2)
     linkselfatom.attrib["rel"] = "license"
     linkselfatom.attrib["href"] = LICENSELIST['ccby']
-    entry = etree.parse(StringIO(etree.tostring(entry, encoding='utf-8')))
+    entry_string = etree.tostring(entry, encoding='utf-8')
+    # Change the image links to absolute links
+    # This will break one day. This is for Anthony Ricaud.
+    normalized_entry = entry_string.replace(
+        '<img src="/', '<img src="http://www.la-grange.net/')
+    # Convert as an elementTree
+    entry = etree.parse(StringIO(normalized_entry))
     logging.info("makefeedentry: new entry created")
     return entry
-
-
-def createtagid(urlpath, isodate):
-    """Create a unide tagid for a given blog post.
-
-    Example: tag:la-grange.net,2012-01-24:2012/01/24/silence
-    """
-    tagid = "tag:%s,%s:%s" % (DOMAIN, isodate[0:10], urlpath.lstrip(SITE))
-    return tagid
 
 
 def rfc3339_to_datetime(rfc3339_date_time):
@@ -180,7 +154,7 @@ def update_feed(feedentry, feed_path):
     * add a new entry, delete the last if a new post
     * add a new entry, remove the old entry if post has changed.
     """
-    NEW_ENTRY = False
+    new_entry = False
     feed = helper.parse_feed(feed_path)
     # XPath for finding tagid
     find_entry = etree.ETXPath("//{%s}entry" % ATOMNS)
@@ -212,8 +186,8 @@ def update_feed(feedentry, feed_path):
                 return lxml.html.tostring(feed, encoding='utf-8')
     else:
         logging.info("This is a new feed entry.")
-        NEW_ENTRY = True
-    if NEW_ENTRY:
+        new_entry = True
+    if new_entry:
         if posts_number > FEED_MAX_POSTS:
             entries[-1].getparent().remove(entries[-1])
         position = feed.getroot().index(feed.find("//{%s}entry" % ATOMNS))
@@ -260,6 +234,7 @@ def updatemonthlyindex(indexmarkup, monthindexpath):
         logging.warn("Monthly index doesn’t exist. TOFIX")
         createmonthlyindex(monthindexpath)
     # grab the list of entry
+    print(etree.tostring(indexmarkup), monthindexpath)
     findentrylist = etree.ETXPath("//section[@id='month-index']/ul/li")
     entries = findentrylist(monthlyindex)
     # search
@@ -289,8 +264,8 @@ def updatemonthlyindex(indexmarkup, monthindexpath):
             'created': created_entry,
             'title': title_entry}
         monthly_entries.append(entry_data)
-    sorted_entries = sorted(monthly_entries,
-                            key=lambda entry: entry['created'])
+    # sorted_entries = sorted(monthly_entries,
+    #                         key=lambda entry: entry['created'])
     LI_TEMPLATE = u'<li><time class="created" datetime="{date}">{date_short}</time> : <a href="{href}">{title}</a></li>'  # noqa
     html_markup = [
         LI_TEMPLATE.format(
@@ -298,7 +273,7 @@ def updatemonthlyindex(indexmarkup, monthindexpath):
             date_short=entry['created'][:10],
             href=entry['href'],
             title=entry['title']
-            )
+        )
         for entry in monthly_entries]
     return '\n'.join(html_markup)
 
@@ -327,8 +302,8 @@ def createmonthlyindex(indexmarkup, monthindexpath):
 
     with open(TEMPLATEDIR + 'index-mois.html', 'r') as source:
         t = string.Template(source.read())
-        datestring = helper.nowdate(DATENOW, 'iso')
-        datehumain = helper.nowdate(DATENOW, 'humain')
+        datestring = helper.convert_date(date_now, 'iso')
+        datehumain = helper.convert_date(date_now, 'humain')
         # to get month, we split in 3 the human date and take the second
         # argument
         datemois = datehumain.split(' ')[1]
@@ -384,15 +359,14 @@ def last_posts_html(entries):
                 tshortdate=tshortdate)
     return last_posts_markup
 
+
 # MAIN
-
-
 def main():
     """Run the core task for processing a file for La Grange."""
     # Logging File Configuration
     logging.basicConfig(filename='log-ymir.txt', level=logging.DEBUG,
                         format='%(asctime)s - %(levelname)s - %(message)s')
-    logging.info('-'*80)
+    logging.info('-' * 80)
     # Command Line Interface
     parser = argparse.ArgumentParser(
         description="Managing Web site blog posts")
@@ -407,30 +381,40 @@ def main():
         dryrun = True
     # Arguments attribution
     raw_post_path = args.rawpost[0]
-    # PATH CONFIGURATIONS
+
+    # *** PATH CONFIGURATIONS ***
     # Getting the path of the current post on the OS
     abspathpost = os.path.abspath(raw_post_path.name)
     post_directory = os.path.dirname(abspathpost)
     # Finding the root of the Web site
-    site_root = find_root(post_directory, ROOT_TOKEN)
+    site_root = helper.find_root(post_directory, ROOT_TOKEN)
+    logging.info('site root: {root}'.format(root=site_root))
     # Post path and full URL without ".html"
     postpath = abspathpost[len(site_root):]
+    logging.info(u'post path: {path}'.format(path=postpath))
     posturl = "%s%s" % (SITE[:-1], postpath[:-5])
+    logging.info(u'post url: {url}'.format(url=posturl))
     # Feed
     feed_path = '%s/%s' % (site_root, FEEDATOMNOM)
+    logging.info(u'feed path: {path}'.format(path=feed_path))
     # Site Home Page
     home_path = '%s/%s' % (site_root, 'index.html')
+    logging.info(u'home_path: {path}'.format(path=home_path))
     # Monthly index
     monthabspath = os.path.dirname(os.path.dirname(abspathpost))
+    logging.info(u'month absolute path: {path}'.format(path=monthabspath))
     monthindexpath = monthabspath + "/index.html"
-    # BACKUPS?
+    logging.info(u'month index path: {path}'.format(path=monthindexpath))
+    # *** END PATH CONFIGURATIONS ***
+
+    # *** BACKUPS ***
     # preparing places for backup
-    BACKUP_PATH = '/tmp/lagrange'
-    if not os.path.isdir(BACKUP_PATH):
-        os.mkdir(BACKUP_PATH)
-    feed_path_bkp = '%s/%s' % (BACKUP_PATH, FEEDATOMNOM)
+    backup_path = '/tmp/lagrange'
+    if not os.path.isdir(backup_path):
+        os.mkdir(backup_path)
+    feed_path_bkp = '%s/%s' % (backup_path, FEEDATOMNOM)
     shutil.copy(feed_path, feed_path_bkp)
-    # PROCESSING
+    # *** PROCESSING ***
     # Parse the document
     rawpost = helper.parse_raw_post(raw_post_path)
     # Extracting Post Information
@@ -440,18 +424,21 @@ def main():
     created = parsing.get_date(rawpost, 'created')
     logging.info("CREATED: %s" % (created))
     modified = parsing.get_date(rawpost, 'modified')
-    DATENOW = rfc3339_to_datetime(modified)
+    date_now = rfc3339_to_datetime(modified)
     logging.info("MODIFIED: %s" % (modified))
     content = parsing.get_content(rawpost)
 
     # INDEX MARKUP
     indexmarkup = createindexmarkup(postpath[:-5], created, title)
+
+    # MONTHLY INDEX CREATION
     # Create the monthly index if it doesn't exist yet
     # Happen once a month
     if not os.path.isfile(monthindexpath):
         createmonthlyindex(indexmarkup, monthindexpath)
     else:
         # TOFIX: updating the monthly index
+        # UPDATE THE MONTHLY INDEX
         if not dryrun:
             html_markup = updatemonthlyindex(indexmarkup, monthindexpath)
             print('WE should write to the index')
@@ -465,27 +452,34 @@ def main():
                 print('nothing to write. Index is already up to date')
             else:
                 print(html_markup)
-            print('-'*80)
+            print('-' * 80)
             print(etree.tostring(
                 indexmarkup, pretty_print=True, encoding='utf-8'))
 
     # FEED ENTRY MARKUP
-    tagid = createtagid(posturl, created)
+    # We compute the tagid using the creation date of the post
+    created_dt = rfc3339_to_datetime(created)
+    created_iso = helper.convert_date(created_dt, 'iso')
+    tagid = helper.create_tagid(posturl, created_iso)
     # UPDATING FEED
     feedentry_data = {'url': posturl,
                       'tagid': tagid,
                       'title': title,
                       'created': created,
-                      'modified': helper.nowdate(DATENOW, 'rfc3339'),
+                      'modified': helper.convert_date(date_now, 'rfc3339'),
                       'content': content}
     feedentry = makefeedentry(feedentry_data)
     feed_content = update_feed(feedentry, feed_path_bkp)
+
+    # SAVE ATOM FEED
     if feed_content:
         if not dryrun:
             with open(feed_path, 'w') as feedbkp:
                 feedbkp.write(feed_content)
         else:
             print('TESTING: feedbkp.write(feed_content)')
+            print(feed_content)
+
     # UPDATING HOME PAGE
     home_content = update_home_index(feed_path, home_path, 'posts_list')
     if not dryrun:

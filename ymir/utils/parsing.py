@@ -61,13 +61,28 @@ def get_content(doc):
     findcontent = etree.ETXPath("//{%s}article" % HTMLNS)
     try:
         content = findcontent(doc)[0]
+        import lxml.html
+        # print(lxml.html.tostring(content))
     except IndexError as e:
         raise IndexError('Ooops. No article.')
     # We want the content without the dates and the title
     findheader = etree.ETXPath("//{%s}header" % HTMLNS)
     try:
-        header = findheader(content)[0]
-        content.remove(header)
+        # header = findheader(content)[0]
+        # content.remove(header)
+        header = findheader(doc)[0]
+        # content.remove(header)
     except IndexError as e:
         logging.info('No header inside article: {e}'.format(e=e))
+    return content
+
+
+def get_html_month_list(doc):
+    """Return a posts list of HTML Element from a month index."""
+    search_path = "//{%s}section[@id='month-index']/{%s}ul/{%s}li"
+    findcontent = etree.ETXPath(search_path % (HTMLNS, HTMLNS, HTMLNS))
+    try:
+        content = findcontent(doc)
+    except IndexError as e:
+        raise IndexError('No index')
     return content
