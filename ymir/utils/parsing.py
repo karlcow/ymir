@@ -8,7 +8,7 @@ Copyright (c) 2018 Grange. All rights reserved.
 see LICENSE.TXT
 """
 
-import ConfigParser
+import configparser
 import logging
 import sys
 
@@ -16,7 +16,7 @@ from lxml import etree
 from lxml.html import html5parser
 
 
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read('ymir/blog.cfg')
 
 HTMLNS = config.get('constants', 'htmlns')

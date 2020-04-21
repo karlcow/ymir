@@ -1,0 +1,5 @@
+# This is for dev purpose
+-r requirements.txt
+pycodestyle==2.5.0
+pytest==5.4.1
+pytest-cov==2.8.1

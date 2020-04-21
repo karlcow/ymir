@@ -42,10 +42,10 @@ class TestYmirParsing(unittest.TestCase):
     def test_get_title(self):
         """Test the extraction of the title."""
         title_tests = [
-            (u'What about 森野?', 'title-utf8.html'),
-            (u'Simple title', 'title-markup.html'),
-            (u'Simple title', 'title-space.html'),
-            (u'Simple title', 'title-simple.html')]
+            ('What about 森野?', 'title-utf8.html'),
+            ('Simple title', 'title-markup.html'),
+            ('Simple title', 'title-space.html'),
+            ('Simple title', 'title-simple.html')]
         for expected, filename in title_tests:
             doc = self.read_fixture(filename)
             actual = parsing.get_title(doc)
@@ -60,30 +60,32 @@ class TestYmirParsing(unittest.TestCase):
         self.assertEqual('2018-03-02T15:54:34+01:00', modified)
         with self.assertRaises(ValueError) as ctx:
             parsing.get_date(doc, 'foobar')
-        self.assertEqual(
-            ctx.exception.message,
-            "date type must be one of ['modified', 'created']")
+            self.assertEqual(
+                ctx.exception.message,
+                "date type must be one of ['modified', 'created']")
 
-    def test_get_content(self):
-        """Test the extraction of the content."""
-        # normal case
-        expected = '<html:article xmlns:html="http://www.w3.org/1999/xhtml"><html:p>This is content: &#28961;</html:p></html:article>'  # noqa
+    def test_get_content_with_article(self):
+        """Test the extraction of the content with article."""
+        expected = '<html:article xmlns:html="http://www.w3.org/1999/xhtml"><html:p>This is content: 無</html:p></html:article>'  # noqa
         doc = self.read_fixture('content-simple.html')
-        content = parsing.get_content(doc)
-        self.assertEqual(
-            etree.tostring(self.make_xml(expected), with_tail=False),
-            etree.tostring(content).replace('\n', ''))
-        # no header in the content
+        content = etree.tostring(parsing.get_content(doc), encoding='unicode').replace('\n', '')  # noqa
+        assert expected == content
+
+    def test_get_content_with_no_header(self):
+        """Test the extraction of the content with no header."""
         expected = '<html:article xmlns:html="http://www.w3.org/1999/xhtml"><html:p>content without header</html:p></html:article>'  # noqa
         doc = self.read_fixture('content-no-header.html')
-        content = parsing.get_content(doc)
-        self.assertEqual(
-            etree.tostring(self.make_xml(expected), with_tail=False),
-            etree.tostring(content).replace('\n', ''))
-        # there is no article
+        content = etree.tostring(parsing.get_content(doc), encoding='unicode').replace('\n', '')  # noqa
+        assert expected == content
+
+    def test_get_content_missing_article(self):
+        """Test the extraction of the content with a missing article.
+
+        It should throw.
+        """
         doc = self.read_fixture('content-none.html')
         with self.assertRaises(IndexError) as ctx:
             parsing.get_content(doc)
-        self.assertEqual(
-            ctx.exception.message,
-            "Ooops. No article.")
+            self.assertEqual(
+                ctx.exception.message,
+                "Ooops. No article.")
