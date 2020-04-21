@@ -10,7 +10,7 @@ see LICENSE.TXT
 import locale
 import logging
 import os
-import urlparse
+import urllib.parse
 
 from lxml import etree
 from lxml.html import html5parser
@@ -74,7 +74,7 @@ def create_tagid(post_url, iso_date):
 
     Example: tag:la-grange.net,2012-01-24:2012/01/24/silence
     """
-    url_parts = urlparse.urlsplit(post_url)
+    url_parts = urllib.parse.urlsplit(post_url)
     domain = url_parts.hostname
     # In la-grange case , we remove the www.
     # This might break elsewhere.

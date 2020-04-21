@@ -47,7 +47,7 @@ class TestYmirHelper(unittest.TestCase):
     def test_create_tagid(self):
         """Test tagid creation."""
         expected = 'tag:la-grange.net,2012-01-24:2012/01/24/silence'
-        post_url = u'http://www.la-grange.net/2012/01/24/silence'
-        iso_date = u'2012-01-24'
+        post_url = 'http://www.la-grange.net/2012/01/24/silence'
+        iso_date = '2012-01-24'
         actual = helper.create_tagid(post_url, iso_date)
         self.assertEqual(actual, expected)

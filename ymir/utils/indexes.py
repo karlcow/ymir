@@ -17,7 +17,7 @@ import sys
 import lxml
 from lxml import etree
 
-import helper
+from . import helper
 
 CODEPATH = os.path.dirname(sys.argv[0])
 TEMPLATEDIR = CODEPATH + "/../templates/"
@@ -72,9 +72,9 @@ def updatemonthlyindex(indexmarkup, monthindexpath):
     for entry in entries:
         href_entry = find_href(entry)[0]
         created_entry = find_created(entry)[0]
-        print("ENTRY: ", created_entry, " TO ", created_ref)
+        print(("ENTRY: ", created_entry, " TO ", created_ref))
         if href_entry == href_ref:
-            print('same uri', href_entry)
+            print(('same uri', href_entry))
             # we check the date
             # we check the title
             # if changed replace

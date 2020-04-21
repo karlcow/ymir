@@ -9,13 +9,14 @@ see LICENSE.TXT
 """
 
 import argparse
-import ConfigParser
+import configparser
+from dataclasses import dataclass
 import datetime
 import logging
 import os
 import shutil
 import string
-from StringIO import StringIO
+from io import StringIO
 import sys
 
 from lxml import etree
@@ -23,41 +24,41 @@ from lxml.etree import Element
 from lxml.etree import SubElement
 import lxml.html
 
-from utils import helper
-from utils import parsing
+from .utils import helper
+from .utils import parsing
 
 # from tracer import show_guts
 
 # CONFIG SITE
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read('blog.cfg')
 
-DOMAIN = u"la-grange.net"
-SITE = u"http://www.%s/" % (DOMAIN)
-ROOT_TOKEN = u'tagid-2000-04-12'
+DOMAIN = "la-grange.net"
+SITE = "http://www.%s/" % (DOMAIN)
+ROOT_TOKEN = 'tagid-2000-04-12'
 FAVICON = SITE + "favicon"
 CODEPATH = os.path.dirname(sys.argv[0])
 TEMPLATEDIR = CODEPATH + "/../templates/"
 
-SITENAME = u"Les carnets Web de La Grange"
-TAGLINE = u"Rêveries le long d'un brin de chèvrefeuille"
+SITENAME = "Les carnets Web de La Grange"
+TAGLINE = "Rêveries le long d'un brin de chèvrefeuille"
 
-FEEDTAGID = u"tag:la-grange.net,2000-04-12:karl"
-FEEDLANG = u"fr"
-FEEDATOMNOM = u"feed.atom"
-FEEDATOMURL = u"%s%s" % (SITE, FEEDATOMNOM)
+FEEDTAGID = "tag:la-grange.net,2000-04-12:karl"
+FEEDLANG = "fr"
+FEEDATOMNOM = "feed.atom"
+FEEDATOMURL = "%s%s" % (SITE, FEEDATOMNOM)
 FEED_MAX_POSTS = 25
 
-STATUSLIST = [u'draft', u'pub', u'acl']
-DATETYPELIST = [u'created', u'modified']
-LICENSELIST = {u'ccby': u'http://creativecommons.org/licenses/by/2.0/fr/',
-               u'copy': u'©'}
+STATUSLIST = ['draft', 'pub', 'acl']
+DATETYPELIST = ['created', 'modified']
+LICENSELIST = {'ccby': 'http://creativecommons.org/licenses/by/2.0/fr/',
+               'copy': '©'}
 
-AUTHOR = u"Karl Dubost"
-AUTHORURI = u"http://www.la-grange.net/karl/"
+AUTHOR = "Karl Dubost"
+AUTHORURI = "http://www.la-grange.net/karl/"
 
-HTMLNS = u"http://www.w3.org/1999/xhtml"
-ATOMNS = u"http://www.w3.org/2005/Atom"
+HTMLNS = "http://www.w3.org/1999/xhtml"
+ATOMNS = "http://www.w3.org/2005/Atom"
 HTML = "{%s}" % HTMLNS
 ATOM = "{%s}" % ATOMNS
 NSMAP = {None: HTMLNS}
@@ -234,7 +235,7 @@ def updatemonthlyindex(indexmarkup, monthindexpath):
         logging.warn("Monthly index doesn’t exist. TOFIX")
         createmonthlyindex(monthindexpath)
     # grab the list of entry
-    print(etree.tostring(indexmarkup), monthindexpath)
+    print((etree.tostring(indexmarkup), monthindexpath))
     findentrylist = etree.ETXPath("//section[@id='month-index']/ul/li")
     entries = findentrylist(monthlyindex)
     # search
@@ -266,7 +267,7 @@ def updatemonthlyindex(indexmarkup, monthindexpath):
         monthly_entries.append(entry_data)
     # sorted_entries = sorted(monthly_entries,
     #                         key=lambda entry: entry['created'])
-    LI_TEMPLATE = u'<li><time class="created" datetime="{date}">{date_short}</time> : <a href="{href}">{title}</a></li>'  # noqa
+    LI_TEMPLATE = '<li><time class="created" datetime="{date}">{date_short}</time> : <a href="{href}">{title}</a></li>'  # noqa
     html_markup = [
         LI_TEMPLATE.format(
             date=entry['created'],
@@ -286,7 +287,7 @@ def createindexmarkup(postpath, created, title):
     li = etree.Element("li")
     ctime = etree.SubElement(li, 'time', dcreated)
     ctime.text = created[:10]
-    ctime.tail = u" : "
+    ctime.tail = " : "
     anchor = etree.SubElement(li, 'a', {'href': postpath})
     anchor.text = title.strip()
     return li
@@ -391,20 +392,20 @@ def main():
     logging.info('site root: {root}'.format(root=site_root))
     # Post path and full URL without ".html"
     postpath = abspathpost[len(site_root):]
-    logging.info(u'post path: {path}'.format(path=postpath))
+    logging.info('post path: {path}'.format(path=postpath))
     posturl = "%s%s" % (SITE[:-1], postpath[:-5])
-    logging.info(u'post url: {url}'.format(url=posturl))
+    logging.info('post url: {url}'.format(url=posturl))
     # Feed
     feed_path = '%s/%s' % (site_root, FEEDATOMNOM)
-    logging.info(u'feed path: {path}'.format(path=feed_path))
+    logging.info('feed path: {path}'.format(path=feed_path))
     # Site Home Page
     home_path = '%s/%s' % (site_root, 'index.html')
-    logging.info(u'home_path: {path}'.format(path=home_path))
+    logging.info('home_path: {path}'.format(path=home_path))
     # Monthly index
     monthabspath = os.path.dirname(os.path.dirname(abspathpost))
-    logging.info(u'month absolute path: {path}'.format(path=monthabspath))
+    logging.info('month absolute path: {path}'.format(path=monthabspath))
     monthindexpath = monthabspath + "/index.html"
-    logging.info(u'month index path: {path}'.format(path=monthindexpath))
+    logging.info('month index path: {path}'.format(path=monthindexpath))
     # *** END PATH CONFIGURATIONS ***
 
     # *** BACKUPS ***
@@ -426,6 +427,7 @@ def main():
     modified = parsing.get_date(rawpost, 'modified')
     date_now = rfc3339_to_datetime(modified)
     logging.info("MODIFIED: %s" % (modified))
+    # the content of the article, we can do better
     content = parsing.get_content(rawpost)
 
     # INDEX MARKUP
@@ -443,8 +445,8 @@ def main():
             html_markup = updatemonthlyindex(indexmarkup, monthindexpath)
             print('WE should write to the index')
             print(html_markup)
-            print(etree.tostring(
-                indexmarkup, pretty_print=True, encoding='utf-8'))
+            print((etree.tostring(
+                indexmarkup, pretty_print=True, encoding='utf-8')))
         else:
             print('TESTING - This would be written:')
             html_markup = updatemonthlyindex(indexmarkup, monthindexpath)
@@ -452,9 +454,9 @@ def main():
                 print('nothing to write. Index is already up to date')
             else:
                 print(html_markup)
-            print('-' * 80)
-            print(etree.tostring(
-                indexmarkup, pretty_print=True, encoding='utf-8'))
+            print(('-' * 80))
+            print((etree.tostring(
+                indexmarkup, pretty_print=True, encoding='utf-8')))
 
     # FEED ENTRY MARKUP
     # We compute the tagid using the creation date of the post

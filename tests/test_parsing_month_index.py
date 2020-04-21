@@ -55,9 +55,9 @@ class TestYmirParsingMonth(unittest.TestCase):
         """Test the extraction of title."""
         doc = self.read_fixture('month-index.html')
         actual = parsing.get_title(doc)
-        expected = u'Archives novembre 2018'
+        expected = 'Archives novembre 2018'
         self.assertEqual(expected, actual)
-        self.assertEqual(type(actual), unicode)
+        self.assertEqual(type(actual), str)
 
     def test_extract_month_list(self):
         """Extract the html fragment from monthly index."""
@@ -66,5 +66,5 @@ class TestYmirParsingMonth(unittest.TestCase):
         self.assertEqual(len(content), 2)
         actual = ''.join([etree.tostring(item, encoding='unicode')
                           for item in content])
-        expected = u'<html:li xmlns:html="http://www.w3.org/1999/xhtml"><html:time class="created" datetime="2018-11-11T11:52:44+09:00">2018-11-11</html:time> : <html:a href="/2018/11/11/tancarville">Le séchoir Tancarville</html:a></html:li>\n<html:li xmlns:html="http://www.w3.org/1999/xhtml"><html:time class="created" datetime="2018-11-11T16:18:22+09:00">2018-11-11</html:time> : <html:a href="/2018/11/11/archive-perenne">Fragilité économique de l\'archive pérenne</html:a></html:li>\n'  # noqa
+        expected = '<html:li xmlns:html="http://www.w3.org/1999/xhtml"><html:time class="created" datetime="2018-11-11T11:52:44+09:00">2018-11-11</html:time> : <html:a href="/2018/11/11/tancarville">Le séchoir Tancarville</html:a></html:li>\n<html:li xmlns:html="http://www.w3.org/1999/xhtml"><html:time class="created" datetime="2018-11-11T16:18:22+09:00">2018-11-11</html:time> : <html:a href="/2018/11/11/archive-perenne">Fragilité économique de l\'archive pérenne</html:a></html:li>\n'  # noqa
         self.assertEqual(expected, actual)
