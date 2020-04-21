@@ -109,7 +109,7 @@ def makefeedentry(feedentry_data):
     linkselfatom = SubElement(entry, 'link', nsmap=NSMAP2)
     linkselfatom.attrib["rel"] = "license"
     linkselfatom.attrib["href"] = LICENSELIST['ccby']
-    entry_string = etree.tostring(entry, encoding='utf-8')
+    entry_string = etree.tostring(entry, encoding='unicode')
     # Change the image links to absolute links
     # This will break one day. This is for Anthony Ricaud.
     normalized_entry = entry_string.replace(
@@ -218,7 +218,7 @@ def update_home_index(feed_path, home_path, id_name):
     home_index = home_template.format(
         id=id_name,
         posts_list=posts_list)
-    lis = lxml.html.fragment_fromstring(home_index.decode('utf-8'))
+    lis = lxml.html.fragment_fromstring(home_index)
     # replace the content of the home index
     blog_ul = home.get_element_by_id(id_name)
     blog_ul.getparent().replace(blog_ul, lis)
