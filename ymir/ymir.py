@@ -24,8 +24,8 @@ from lxml.etree import Element
 from lxml.etree import SubElement
 import lxml.html
 
-from .utils import helper
-from .utils import parsing
+from utils import helper
+from utils import parsing
 
 # from tracer import show_guts
 
