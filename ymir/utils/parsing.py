@@ -81,8 +81,4 @@ def get_html_month_list(doc):
     """Return a posts list of HTML Element from a month index."""
     search_path = "//{%s}section[@id='month-index']/{%s}ul/{%s}li"
     findcontent = etree.ETXPath(search_path % (HTMLNS, HTMLNS, HTMLNS))
-    try:
-        content = findcontent(doc)
-    except IndexError as e:
-        raise IndexError('No index')
-    return content
+    return findcontent(doc)
