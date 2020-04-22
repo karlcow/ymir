@@ -92,6 +92,7 @@ def find_root(directory, token):
     # Make sure we have a full path instead of a relative path
     if directory.startswith('.'):
         directory = os.path.realpath(directory)
+    print(directory)
     # Create a list of the files in the current directory
     # If it fails the path doesn't exist
     try:

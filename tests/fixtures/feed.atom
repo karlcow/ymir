@@ -1,0 +1,28 @@
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="fr">
+<title>Carnets de La Grange</title>
+<subtitle>Chroniques d'un poète urbain</subtitle>
+<id>tag:la-grange.net,2000-04-12:karl</id>
+  <updated>2020-04-21T14:59:59Z</updated>
+<link href="http://www.la-grange.net/feed.atom" rel="self" type="application/atom+xml"></link>
+<link href="http://www.la-grange.net/" rel="alternate" type="application/xhtml+xml"></link>
+<link href="http://creativecommons.org/licenses/by/2.0/fr/" rel="license"></link>
+<icon>http://www.la-grange.net/favicon.png</icon>
+<author>
+    <name>Karl Dubost</name>
+    <uri>http://www.la-grange.net/karl/</uri>
+</author>
+
+<entry>
+    <id>tag:la-grange.net,2020-04-21:2020/04/21/absence</id>
+    <link rel="alternate" type="text/html" href="http://www.la-grange.net/2020/04/21/absence"></link>
+    <title>absences</title>
+    <published>2020-04-21T23:59:59+09:00</published>
+    <updated>2020-04-21T14:59:59Z</updated>
+    <content type="xhtml">
+        <div xmlns="http://www.w3.org/1999/xhtml">
+            <article class="item post">un billet</article>
+        </div>
+    </content>
+    <link rel="license" href="http://creativecommons.org/licenses/by/2.0/fr/"></link>
+</entry>
+</feed>

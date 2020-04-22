@@ -7,9 +7,14 @@ see LICENSE.TXT
 """
 
 import datetime
+import os
 import unittest
 
+from lxml import etree
+
 from ymir.utils import helper
+
+FIXTURE_DIR = './tests/fixtures/'
 
 
 class TestYmirHelper(unittest.TestCase):
@@ -51,3 +56,73 @@ class TestYmirHelper(unittest.TestCase):
         iso_date = '2012-01-24'
         actual = helper.create_tagid(post_url, iso_date)
         self.assertEqual(actual, expected)
+
+    def test_parse_raw_post(self):
+        """Test raw post parsing"""
+        fixture_file = 'content-simple.html'
+        fixture_path = os.path.abspath(os.path.join(FIXTURE_DIR, fixture_file))
+        actual = helper.parse_raw_post(fixture_path)
+        actual_normalized = etree.tostring(actual, encoding='unicode').replace('\n', '')  # noqa
+        expected = (
+            '<html:html xmlns:html="http://www.w3.org/1999/xhtml" '
+            'lang="fr"><html:head><html:meta charset="utf-8"/>'
+            '</html:head><html:body>'
+            '<html:header>'
+            '<html:h1>Simple title</html:h1>'
+            '</html:header>'
+            '<html:article>'
+            '<html:p>This is content: 無</html:p>'
+            '</html:article>'
+            '</html:body></html:html>')
+        assert type(actual).__name__ == '_Element'
+        assert  actual_normalized == expected
+
+    def test_parse_feed(self):
+        """Test feed parsing"""
+        fixture_file = 'feed.atom'
+        fixture_path = os.path.abspath(os.path.join(FIXTURE_DIR, fixture_file))
+        actual = helper.parse_feed(fixture_path)
+        actual_normalized = etree.tostring(actual, encoding='unicode').replace('\n', '')  # noqa
+        expected = (
+            '<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="fr">'
+            '<title>Carnets de La Grange</title>'
+            "<subtitle>Chroniques d'un poète urbain</subtitle>"
+            '<id>tag:la-grange.net,2000-04-12:karl</id>'
+            '  <updated>2020-04-21T14:59:59Z</updated>'
+            '<link href="http://www.la-grange.net/feed.atom" rel="self"'
+            ' type="application/atom+xml"/>'
+            '<link href="http://www.la-grange.net/" rel="alternate" '
+            'type="application/xhtml+xml"/>'
+            '<link href="http://creativecommons.org/licenses/by/2.0/fr/" '
+            'rel="license"/><icon>http://www.la-grange.net/favicon.png</icon>'
+            '<author>    <name>Karl Dubost</name>    '
+            '<uri>http://www.la-grange.net/karl/</uri></author>'
+            '<entry>    '
+            '<id>tag:la-grange.net,2020-04-21:2020/04/21/absence</id>    '
+            '<link rel="alternate" type="text/html" '
+            'href="http://www.la-grange.net/2020/04/21/absence"/>'
+            '    <title>absences</title>'
+            '    <published>2020-04-21T23:59:59+09:00</published>'
+            '    <updated>2020-04-21T14:59:59Z</updated>'
+            '    <content type="xhtml">'
+            '        <div xmlns="http://www.w3.org/1999/xhtml">'
+            '            <article class="item post">un billet</article>'
+            '        </div>'
+            '    </content>'
+            '    <link rel="license"'
+            ' href="http://creativecommons.org/licenses/by/2.0/fr/"/></entry>'
+            '</feed>')
+        assert type(actual).__name__ == '_ElementTree'
+        assert  actual_normalized == expected
+
+    def test_find_root(self):
+        """test the root finding."""
+        post_directory = './tests/fixtures/fake_tree/2020/01/01'
+        actual = helper.find_root(post_directory, 'root_token')
+        assert actual.endswith('tests/fixtures/fake_tree')
+        post_directory = './tests/fixtures/'
+        actual = helper.find_root(post_directory, 'root_token')
+        assert actual == None
+        post_directory = './tests/fixtures/2020/02'
+        actual = helper.find_root(post_directory, 'root_token')
+        assert actual == None
