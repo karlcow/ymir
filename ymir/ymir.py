@@ -34,6 +34,19 @@ from ymir.utils import feed
 config = configparser.ConfigParser()
 config.read('blog.cfg')
 
+HTMLNS = "http://www.w3.org/1999/xhtml"
+HTML = "{%s}" % HTMLNS
+NSMAP = {None: HTMLNS}
+NSMAP3 = {'html': HTMLNS}
+
+ATOMNS = "http://www.w3.org/2005/Atom"
+NSMAP2 = {None: ATOMNS}
+ATOM = "{%s}" % ATOMNS
+NSMAP4 = {'atom': ATOMNS}
+
+LICENSELIST = {'ccby': 'http://creativecommons.org/licenses/by/2.0/fr/',
+               'copy': '©'}
+
 DOMAIN = "la-grange.net"
 SITE = "http://www.%s/" % (DOMAIN)
 ROOT_TOKEN = 'tagid-2000-04-12'
@@ -59,13 +72,9 @@ AUTHOR = "Karl Dubost"
 AUTHORURI = "http://www.la-grange.net/karl/"
 
 HTMLNS = "http://www.w3.org/1999/xhtml"
-ATOMNS = "http://www.w3.org/2005/Atom"
 HTML = "{%s}" % HTMLNS
-ATOM = "{%s}" % ATOMNS
 NSMAP = {None: HTMLNS}
-NSMAP2 = {None: ATOMNS}
 NSMAP3 = {'html': HTMLNS}
-NSMAP4 = {'atom': ATOMNS}
 
 # CONFIG with cli
 STYLESHEET = "/2011/12/01/proto/style/article.css"

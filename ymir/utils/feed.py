@@ -8,10 +8,15 @@ see LICENSE.TXT
 """
 from io import StringIO
 import logging
+import os
+import sys
 
 from lxml import etree
 from lxml.etree import Element
 from lxml.etree import SubElement
+import lxml.html
+
+from ymir.utils import helper
 
 HTMLNS = "http://www.w3.org/1999/xhtml"
 HTML = "{%s}" % HTMLNS
@@ -25,6 +30,35 @@ NSMAP4 = {'atom': ATOMNS}
 
 LICENSELIST = {'ccby': 'http://creativecommons.org/licenses/by/2.0/fr/',
                'copy': '©'}
+
+DOMAIN = "la-grange.net"
+SITE = "http://www.%s/" % (DOMAIN)
+ROOT_TOKEN = 'tagid-2000-04-12'
+FAVICON = SITE + "favicon"
+CODEPATH = os.path.dirname(sys.argv[0])
+TEMPLATEDIR = CODEPATH + "/../templates/"
+
+SITENAME = "Les carnets Web de La Grange"
+TAGLINE = "Rêveries le long d'un brin de chèvrefeuille"
+
+FEEDTAGID = "tag:la-grange.net,2000-04-12:karl"
+FEEDLANG = "fr"
+FEEDATOMNOM = "feed.atom"
+FEEDATOMURL = "%s%s" % (SITE, FEEDATOMNOM)
+FEED_MAX_POSTS = 25
+
+STATUSLIST = ['draft', 'pub', 'acl']
+DATETYPELIST = ['created', 'modified']
+LICENSELIST = {'ccby': 'http://creativecommons.org/licenses/by/2.0/fr/',
+               'copy': '©'}
+
+AUTHOR = "Karl Dubost"
+AUTHORURI = "http://www.la-grange.net/karl/"
+
+HTMLNS = "http://www.w3.org/1999/xhtml"
+HTML = "{%s}" % HTMLNS
+NSMAP = {None: HTMLNS}
+NSMAP3 = {'html': HTMLNS}
 
 
 def makefeedentry(feedentry_data):
