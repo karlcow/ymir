@@ -11,6 +11,7 @@ import os
 import unittest
 
 from lxml import etree
+import pytest
 
 from ymir.utils import parsing
 
@@ -49,7 +50,15 @@ class TestYmirParsing(unittest.TestCase):
         for expected, filename in title_tests:
             doc = self.read_fixture(filename)
             actual = parsing.get_title(doc)
-            self.assertEqual(expected, actual)
+            assert actual == expected
+
+    def test_get_no_title(self):
+        """Test the extraction of the empty title."""
+        doc = self.read_fixture('title-no-title.html')
+        with pytest.raises(SystemExit) as sysexit_test:
+            parsing.get_title(doc)
+        assert sysexit_test.type == SystemExit
+        assert sysexit_test.value.code == 'ERROR: The document has no title'
 
     def test_get_date(self):
         """Test the extraction of the date."""
