@@ -95,7 +95,7 @@ class TestYmirHelper(unittest.TestCase):
             '</html:article>'
             '</html:body></html:html>')
         assert type(actual).__name__ == '_Element'
-        assert  actual_normalized == expected
+        assert actual_normalized == expected
 
     def test_parse_feed(self):
         """Test feed parsing"""
@@ -133,7 +133,7 @@ class TestYmirHelper(unittest.TestCase):
             ' href="http://creativecommons.org/licenses/by/2.0/fr/"/></entry>'
             '</feed>')
         assert type(actual).__name__ == '_ElementTree'
-        assert  actual_normalized == expected
+        assert actual_normalized == expected
 
     def test_find_root(self):
         """test the root finding."""
@@ -142,7 +142,7 @@ class TestYmirHelper(unittest.TestCase):
         assert actual.endswith('tests/fixtures/fake_tree')
         post_directory = './tests/fixtures/'
         actual = helper.find_root(post_directory, 'root_token')
-        assert actual == None
+        assert actual is None
         post_directory = './tests/fixtures/2020/02'
         actual = helper.find_root(post_directory, 'root_token')
-        assert actual == None
+        assert actual is None
