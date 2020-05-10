@@ -63,7 +63,6 @@ NSMAP3 = {'html': HTMLNS}
 
 def makefeedentry(feedentry_data):
     """Create an individual Atom feed entry from a ready to be publish post."""
-    print(feedentry_data)
     entry = Element('{http://www.w3.org/2005/Atom}entry', nsmap=NSMAP2)
     id_element = SubElement(entry, 'id')
     id_element.text = feedentry_data['tagid']
