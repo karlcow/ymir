@@ -93,84 +93,6 @@ La Grange http://www.la-grange.net/.
 """
 
 
-def update_home_index(feed_path, home_path, id_name):
-    """Update the HTML index with the feedendry content."""
-    # Get HTML from the index
-    if os.path.isfile(home_path):
-        html = lxml.html.parse(home_path)
-        home = html.getroot()
-    else:
-        logging.error("WRONG PATH: %s" % (home_path))
-    # Get an entry dictionary from the Feed
-    entries = last_posts(feed_path)
-    # Generate string with markup
-    home_template = """<ul id="{id}">
-    {posts_list}
-    </ul>
-    """
-    posts_list = last_posts_html(entries)
-    home_index = home_template.format(
-        id=id_name,
-        posts_list=posts_list)
-    lis = lxml.html.fragment_fromstring(home_index)
-    # replace the content of the home index
-    blog_ul = home.get_element_by_id(id_name)
-    blog_ul.getparent().replace(blog_ul, lis)
-    return lxml.html.tostring(html, encoding='utf-8')
-
-
-def updatemonthlyindex(indexmarkup, monthindexpath):
-    """Update the HTML monthly index with the feedendry."""
-    # Looking for a monthly index
-    if os.path.isfile(monthindexpath):
-        monthlyindex = lxml.html.parse(monthindexpath).getroot()
-        logging.info("Monthly Index exists")
-    else:
-        logging.warn("Monthly index doesn’t exist. TOFIX")
-        createmonthlyindex(monthindexpath)
-    # grab the list of entry
-    print((etree.tostring(indexmarkup), monthindexpath))
-    findentrylist = etree.ETXPath("//section[@id='month-index']/ul/li")
-    entries = findentrylist(monthlyindex)
-    # search
-    find_href = etree.ETXPath("a/@href")
-    find_created = etree.ETXPath("time/@datetime")
-    find_title = etree.ETXPath("a/text()")
-    # Reference
-    href_ref = find_href(indexmarkup)[0]
-    created_ref = find_created(indexmarkup)[0]
-    title_ref = find_title(indexmarkup)[0]
-    entry_ref = {
-        'href': href_ref,
-        'created': created_ref,
-        'title': title_ref}
-    print(entry_ref)
-    # Index data
-    monthly_entries = []
-    for entry in entries:
-        href_entry = find_href(entry)[0]
-        # same URI, entry already exists, we stop.
-        if href_entry == href_ref:
-            return False
-        created_entry = find_created(entry)[0]
-        title_entry = find_title(entry)[0]
-        entry_data = {
-            'href': href_entry,
-            'created': created_entry,
-            'title': title_entry}
-        monthly_entries.append(entry_data)
-    # sorted_entries = sorted(monthly_entries,
-    #                         key=lambda entry: entry['created'])
-    LI_TEMPLATE = '<li><time class="created" datetime="{date}">{date_short}</time> : <a href="{href}">{title}</a></li>'  # noqa
-    html_markup = [
-        LI_TEMPLATE.format(
-            date=entry['created'],
-            date_short=entry['created'][:10],
-            href=entry['href'],
-            title=entry['title']
-        )
-        for entry in monthly_entries]
-    return '\n'.join(html_markup)
 
 
 def createindexmarkup(postpath, created, title):
@@ -184,34 +106,6 @@ def createindexmarkup(postpath, created, title):
     ctime.tail = " : "
     anchor = etree.SubElement(li, 'a', {'href': postpath})
     anchor.text = title.strip()
-    return li
-
-
-def createmonthlyindex(indexmarkup, monthindexpath):
-    """Create a monthly index when it doesn't exist."""
-    # Code ici pour lire un fichier avec des variables
-    # substituer les variables par les valeurs du mois
-    # sauver le fichier au bon endroit
-    msg = "Do not forget to update /map with your tiny hands"
-    logging.info("%s" % (msg))
-
-    with open(TEMPLATEDIR + 'index-mois.html', 'r') as source:
-        t = string.Template(source.read())
-        datestring = helper.convert_date(date_now, 'iso')
-        datehumain = helper.convert_date(date_now, 'humain')
-        # to get month, we split in 3 the human date and take the second
-        # argument
-        datemois = datehumain.split(' ')[1]
-        indexli = etree.tostring(
-            indexmarkup, pretty_print=True, encoding='utf-8')
-        result = t.substitute(isodateshort=datestring,
-                              monthname=datemois,
-                              year=datestring[:4],
-                              humandate=datehumain,
-                              firstentry=indexli)
-        # need to write it on the filesystem.
-    with open(monthindexpath, 'w') as monthindex:
-        monthindex.write(result)
 
 
 def last_posts(feed_path):
@@ -237,25 +131,6 @@ def last_posts(feed_path):
     return entries
 
 
-def last_posts_html(entries):
-    """Return the HTML markup for the last entries."""
-    # msg = "Generating HTML markup for last entries in the feed"
-    # logging.info("%s" % (msg))
-    last_posts_markup = ''
-    with open(TEMPLATEDIR + 'last_posts.html', 'r') as source:
-        t = string.Template(source.read())
-        for entry in entries:
-            published = entry['published']
-            tshortdate = published[:10]
-            last_posts_markup += t.substitute(
-                ttitle=entry['title'].encode('utf-8'),
-                turl=entry['url'],
-                tpublished=published,
-                tshortdate=tshortdate)
-    return last_posts_markup
-
-
-# MAIN
 def main():
     """Run the core task for processing a file for La Grange."""
     # Logging File Configuration
@@ -336,18 +211,11 @@ def main():
         # TOFIX: updating the monthly index
         # UPDATE THE MONTHLY INDEX
         if not dryrun:
-            html_markup = updatemonthlyindex(indexmarkup, monthindexpath)
             print('WE should write to the index')
-            print(html_markup)
             print((etree.tostring(
                 indexmarkup, pretty_print=True, encoding='unicode')))
         else:
             print('TESTING - This would be written:')
-            html_markup = updatemonthlyindex(indexmarkup, monthindexpath)
-            if not html_markup:
-                print('nothing to write. Index is already up to date')
-            else:
-                print(html_markup)
             print(('-' * 80))
             print((etree.tostring(
                 indexmarkup, pretty_print=True, encoding='utf-8')))
@@ -374,19 +242,6 @@ def main():
                 feedbkp.write(feed_content.decode('utf-8'))
         else:
             print('TESTING: feedbkp.write(feed_content)')
-            print(feed_content)
-
-    # UPDATING HOME PAGE
-    home_content = update_home_index(feed_path, home_path, 'posts_list')
-    if not dryrun:
-        pass
-        # todo
-        # with open(home_path, 'w') as home:
-        #     home.write(home_content.decode('utf-8'))
-    else:
-        print('TESTING: home.write(home_content)')
-    # UPDATING MONTHLY INDEX
-    # updatemonthlyindex(indexmarkup, monthindexpath)
 
 
 if __name__ == "__main__":
