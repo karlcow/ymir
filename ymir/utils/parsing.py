@@ -38,7 +38,7 @@ def get_title(doc):
     title = findtitle(doc)[0]
     titletext = etree.tostring(title, encoding="utf-8", method="text")
     titletext = titletext.strip()
-    return titletext.decode('utf-8')
+    return titletext.decode('utf-8').strip()
 
 
 def get_date(doc, date_type):
@@ -52,7 +52,7 @@ def get_date(doc, date_type):
             valid_types=date_types))
     finddate = etree.ETXPath(
         "string(//{%s}time[@class=%r]/@datetime)" % (HTMLNS, date_type))
-    date = finddate(doc)
+    date = str(finddate(doc))
     return date
 
 

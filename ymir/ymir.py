@@ -139,6 +139,7 @@ def createindexmarkup(postpath, created, title):
     ctime.tail = " : "
     anchor = etree.SubElement(li, 'a', {'href': postpath})
     anchor.text = title.strip()
+    return etree.tostring(li, encoding='unicode')
 
 
 def last_posts(feed_path):
@@ -188,13 +189,15 @@ def main():
     # *** PATH CONFIGURATIONS ***
     # Getting the path of the current post on the OS
     abspathpost = os.path.abspath(raw_post_path.name)
-    post_directory = os.path.dirname(abspathpost)
+
     # Finding the root of the Web site
-    site_root = helper.find_root(post_directory, ROOT_TOKEN)
+    site_root = helper.find_root(os.path.dirname(abspathpost), ROOT_TOKEN)
     logging.info('site root: {root}'.format(root=site_root))
+
     # Post path and full URL without ".html"
     postpath = abspathpost[len(site_root):]
     logging.info('post path: {path}'.format(path=postpath))
+
     posturl = "%s%s" % (SITE[:-1], postpath[:-5])
     logging.info('post url: {url}'.format(url=posturl))
     # Feed
@@ -217,20 +220,22 @@ def main():
         os.mkdir(backup_path)
     feed_path_bkp = '%s/%s' % (backup_path, FEEDATOMNOM)
     shutil.copy(feed_path, feed_path_bkp)
-    # *** PROCESSING ***
-    # Parse the document
-    rawpost = helper.parse_raw_post(raw_post_path)
+
+    # *** BLOG POST INITIALIZATION ***
+    post = Post(absolute_path=abspathpost)
     # Extracting Post Information
-    title = parsing.get_title(rawpost)
-    title = title.strip()
-    logging.info("TITLE: %s" % (title))
-    created = parsing.get_date(rawpost, 'created')
-    logging.info("CREATED: %s" % (created))
-    modified = parsing.get_date(rawpost, 'modified')
+    title = post.title
+    created = post.created_date
+    modified = post.modified_date
+    content = post.article
+
+    # logging
+    logging.info("TITLE: {}".format(title))
+    logging.info("CREATED: {}".format(created))
+    logging.info("MODIFIED: {}".format(modified))
+
+    #
     date_now = helper.rfc3339_to_datetime(modified)
-    logging.info("MODIFIED: %s" % (modified))
-    # the content of the article, we can do better
-    content = parsing.get_content(rawpost)
 
     # INDEX MARKUP
     indexmarkup = createindexmarkup(postpath[:-5], created, title)
@@ -245,13 +250,11 @@ def main():
         # UPDATE THE MONTHLY INDEX
         if not dryrun:
             print('WE should write to the index')
-            print((etree.tostring(
-                indexmarkup, pretty_print=True, encoding='unicode')))
+            print(indexmarkup)
         else:
             print('TESTING - This would be written:')
             print(('-' * 80))
-            print((etree.tostring(
-                indexmarkup, pretty_print=True, encoding='utf-8')))
+            print(indexmarkup)
 
     # FEED ENTRY MARKUP
     # We compute the tagid using the creation date of the post
