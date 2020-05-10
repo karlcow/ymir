@@ -5,15 +5,17 @@ main code test
 see LICENSE.TXT
 """
 
-from io import BytesIO
 import os
 import unittest
+from io import BytesIO
 
 import pytest
 
+from ymir.ymir import createindexmarkup
 from ymir.ymir import last_posts
 
 FIXTURE_DIR = './tests/fixtures/'
+
 
 class TestYmir(unittest.TestCase):
     """Test the main code."""
@@ -39,7 +41,7 @@ class TestYmir(unittest.TestCase):
         pass
 
     def test_last_posts(self):
-        """test the feed parsing"""
+        """Test the feed parsing."""
         feed_path = os.path.abspath(os.path.join(FIXTURE_DIR, 'feed.atom'))
         actual = last_posts(feed_path)
         expected = [{
@@ -50,3 +52,13 @@ class TestYmir(unittest.TestCase):
         assert actual == expected
         assert type(actual) is list
         assert type(actual[0]) is dict
+
+    def test_createindexmarkup(self):
+        """Test the index construct."""
+        expected = '<li><time class="created" datetime="2020-05-10T23:59:59+09:00">2020-05-10</time> : <a href="/somewhere">神奈川県</a></li>'   # noqa
+        actual = createindexmarkup(
+            '/somewhere',
+            '2020-05-10T23:59:59+09:00',
+            '神奈川県')
+        assert actual == expected
+        assert type(actual) == str
