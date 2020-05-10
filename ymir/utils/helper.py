@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 # encoding: utf-8
 """Helpers for the code.
 
@@ -7,6 +7,7 @@ Copyright (c) 2014 Grange. All rights reserved.
 see LICENSE.TXT
 """
 
+import datetime
 import locale
 import logging
 import os
@@ -53,6 +54,34 @@ def convert_date(date_time, format=""):
         return None
 
 
+def rfc3339_to_datetime(rfc3339_date_time):
+    """Convert dates.
+
+    Incomplete because I know my format.
+    Do not reuse elsewhere.
+    2014-04-04T23:59:00+09:00
+    2014-04-04T23:59:00Z
+    """
+    # Extraire la date et le temps sans le fuseau
+    # 2014-04-04T23:59:00+09:00 -> 2014-04-04T23:59:00
+    date_time, offset = rfc3339_date_time[:19], rfc3339_date_time[19:]
+    # convertir en objet datetime
+    date_time = datetime.datetime.strptime(date_time, "%Y-%m-%dT%H:%M:%S")
+    # extraire le fuseau horaire
+    # 2014-04-04T23:59:00+09:00 -> +09:00
+    # 2014-04-04T23:59:00Z      -> Z
+    # Si Z, on est déjà en UTC.
+    if 'Z' not in offset:
+        tz_hours, tz_minutes = int(offset[1:3]), int(offset[4:6])
+        if '+' in offset:
+            # si + on doit déduire le temps pour obtenir l'heure en UTC
+            date_time -= datetime.timedelta(hours=tz_hours, minutes=tz_minutes)
+        else:
+            # si - on doit ajouter le temps pour obtenir l'heure en UTC
+            date_time += datetime.timedelta(hours=tz_hours, minutes=tz_minutes)
+    return date_time
+
+
 def parse_raw_post(raw_post_path):
     """Given a path, parse an html file."""
     doc = html5parser.parse(raw_post_path).getroot()
@@ -92,7 +121,6 @@ def find_root(directory, token):
     # Make sure we have a full path instead of a relative path
     if directory.startswith('.'):
         directory = os.path.realpath(directory)
-    print(directory)
     # Create a list of the files in the current directory
     # If it fails the path doesn't exist
     try:

@@ -49,6 +49,26 @@ class TestYmirHelper(unittest.TestCase):
             'Dimanche 2 avril 2000')
         self.assertIsNone(helper.convert_date(test_date, 'foobar'))
 
+    def test_rfc3339_to_datetime_with_Z(self):
+        """Test date conversion."""
+        date_in = '2014-04-04T23:59:00Z'
+        actual = helper.rfc3339_to_datetime(date_in)
+        expected = datetime.datetime(2014, 4, 4, 23, 59)
+        assert actual == expected
+
+    def test_rfc3339_to_datetime_without_Z(self):
+        """Test date conversion."""
+        # tz + 9 hours
+        date_in = '2014-04-04T23:59:00+09:00'
+        actual = helper.rfc3339_to_datetime(date_in)
+        expected = datetime.datetime(2014, 4, 4, 14, 59)
+        assert actual == expected
+        # tz - 9 hours
+        date_in = '2014-04-04T23:59:00-09:00'
+        actual = helper.rfc3339_to_datetime(date_in)
+        expected = datetime.datetime(2014, 4, 5, 8, 59)
+        assert actual == expected
+
     def test_create_tagid(self):
         """Test tagid creation."""
         expected = 'tag:la-grange.net,2012-01-24:2012/01/24/silence'
@@ -75,7 +95,7 @@ class TestYmirHelper(unittest.TestCase):
             '</html:article>'
             '</html:body></html:html>')
         assert type(actual).__name__ == '_Element'
-        assert  actual_normalized == expected
+        assert actual_normalized == expected
 
     def test_parse_feed(self):
         """Test feed parsing"""
@@ -113,7 +133,7 @@ class TestYmirHelper(unittest.TestCase):
             ' href="http://creativecommons.org/licenses/by/2.0/fr/"/></entry>'
             '</feed>')
         assert type(actual).__name__ == '_ElementTree'
-        assert  actual_normalized == expected
+        assert actual_normalized == expected
 
     def test_find_root(self):
         """test the root finding."""
@@ -122,7 +142,7 @@ class TestYmirHelper(unittest.TestCase):
         assert actual.endswith('tests/fixtures/fake_tree')
         post_directory = './tests/fixtures/'
         actual = helper.find_root(post_directory, 'root_token')
-        assert actual == None
+        assert actual is None
         post_directory = './tests/fixtures/2020/02'
         actual = helper.find_root(post_directory, 'root_token')
-        assert actual == None
+        assert actual is None
