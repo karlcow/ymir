@@ -93,6 +93,39 @@ La Grange http://www.la-grange.net/.
 """
 
 
+@dataclass
+class Blog:
+    """Blog definition."""
+    absolute_root: str
+    feed_name: str
+    root_token: str
+    feed_path: str = ''
+    home_index_path: str = ''
+
+
+@dataclass
+class Post:
+    """Blog post definition."""
+    absolute_path: str
+    absolute_site_root: str = ''
+    full_content: str = ''
+    title: str = ''
+    article: str = ''
+    created_date: str = ''
+    modified_date: str = ''
+    web_path: str = ''
+    month_index_path: str = ''
+    year_index_path: str = ''
+
+    def __post_init__(self):
+        self.absolute_site_root = helper.find_root(
+            os.path.dirname(self.absolute_path), ROOT_TOKEN)
+        self.full_content = helper.parse_raw_post(self.absolute_path)
+        self.title = parsing.get_title(self.full_content)
+        self.article = parsing.get_content(self.full_content)
+        self.created_date = parsing.get_date(self.full_content, 'created')
+        self.modified_date = parsing.get_date(self.full_content, 'modified')
+        self.web_path = self.absolute_path[len(self.absolute_site_root):]
 
 
 def createindexmarkup(postpath, created, title):
