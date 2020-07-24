@@ -109,7 +109,8 @@ def main():
     month_name = f"{d:%B}"
     # special rendering
     renderer = GrangeRenderer()
-    markdown = mistune.create_markdown(renderer=renderer)
+    markdown = mistune.create_markdown(
+        renderer=renderer, plugins=['strikethrough'])
     # metadata
     metadata = {
         'title': meta['title'],
