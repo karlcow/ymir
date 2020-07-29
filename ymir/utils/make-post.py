@@ -2,6 +2,7 @@ from datetime import datetime
 from glob import glob
 import locale
 import re
+import sys
 from textwrap import dedent
 
 import mistune
@@ -25,8 +26,12 @@ class GrangeRenderer(mistune.HTMLRenderer):
     def get_img_size(self, image_path):
         """extract width and height of an image."""
         full_path = ROOT + image_path
-        im = Image.open(full_path)
-        return im.size
+        try:
+            with Image.open(full_path) as im:
+                return im.size
+        except FileNotFoundError as e:
+            print('TOFIX: Image file path incorrect')
+            sys.exit(f'       {e}')
 
     def image(self, src, alt="", title=None):
         width, height = self.get_img_size(src)
