@@ -46,7 +46,7 @@ class GrangeRenderer(mistune.HTMLRenderer):
                 </figure>
                 """)
         else:
-            s = f'<img src="{src}" alt="{alt}" width="{width}" height="{height}" />'
+            s = f'<img src="{src}" alt="{alt}" width="{width}" height="{height}" />'  # noqa
             return s
 
     def paragraph(self, text):
@@ -55,7 +55,6 @@ class GrangeRenderer(mistune.HTMLRenderer):
         if text.strip().startswith("<figure>"):
             return text
         return f"<p>{text}</p>\n"
-
 
 
 def parse(text):
@@ -87,10 +86,9 @@ def main():
     # explore_path = ROOT + '/2019/*/*/*.md'
     # paths = glob(explore_path)
     # paths.sort()
-    with open('/Users/karl/Sites/la-grange.net/2019/12/04/article_tmpl.html') as tmpfile:
+    template_path = f'{ROOT}/2019/12/04/article_tmpl.html'
+    with open(template_path) as tmpfile:
         blog_tmp = tmpfile.read()
-    # prev_title = 'Friction'
-    # for entry_path in paths:
 
     with open(entry_path) as entry:
         text = entry.read()
@@ -103,7 +101,6 @@ def main():
         htmldata = BeautifulSoup(text_prev, features="lxml")
         prev_title = htmldata.find('title').text
         prev_title = prev_title.replace(' - Carnets Web de La Grange', '')
-
     # Meta extraction
     # Created
     created_timestamp = '{datestr}T23:59:59+09:00'.format(datestr=meta['date'])
@@ -134,16 +131,17 @@ def main():
         'url': meta['url'],
         'stylepath': meta['style'],
         }
-    # print(meta)
     blog_post = blog_tmp.format(**metadata)
     dest = ROOT + '/{year}/{month}/{day_path}/{url}.html'.format(**metadata)
     print(dest)
     with open(dest, 'w') as blogpost:
         blogpost.write(blog_post)
 
+
 def extract_date(path):
     full_date = PATH.match(path)
     return '-'.join(full_date.groups())
+
 
 if __name__ == "__main__":
     main()
