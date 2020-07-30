@@ -73,6 +73,24 @@ def parse(text):
         m = META.match(text)
     return rv, text
 
+
+def get_draft(entry_path):
+    """Read the draft.
+
+    It returns a tuple with:
+    - meta: dict
+    - text: str
+    """
+    try:
+        with open(entry_path) as entry:
+            text = entry.read()
+    except FileNotFoundError as e:
+        print('TOFIX: draft file path incorrect')
+        sys.exit(f'       {e}')
+    else:
+        return parse(text)
+
+
 def main():
     locale.setlocale(locale.LC_ALL, 'fr_FR')
     import argparse
@@ -89,12 +107,11 @@ def main():
     template_path = f'{ROOT}/2019/12/04/article_tmpl.html'
     with open(template_path) as tmpfile:
         blog_tmp = tmpfile.read()
-
-    with open(entry_path) as entry:
-        text = entry.read()
-        meta, entry_text = parse(text)
+    # Read the draft post
+    meta, entry_text = get_draft(entry_path)
     pprint(meta)
     prev_url = meta['prev']
+    # Read the previous blog entry
     with open(ROOT + prev_url + '.html') as prev_entry:
         from bs4 import BeautifulSoup
         text_prev = prev_entry.read()
