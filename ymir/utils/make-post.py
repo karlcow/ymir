@@ -1,6 +1,7 @@
 from datetime import datetime
 from glob import glob
 import locale
+from pprint import pprint
 import re
 import sys
 from textwrap import dedent
@@ -94,7 +95,7 @@ def main():
     with open(entry_path) as entry:
         text = entry.read()
         meta, entry_text = parse(text)
-    print(meta)
+    pprint(meta)
     prev_url = meta['prev']
     with open(ROOT + prev_url + '.html') as prev_entry:
         from bs4 import BeautifulSoup
