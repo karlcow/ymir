@@ -13,9 +13,9 @@ import unittest
 from lxml import etree
 import pytest
 
+from tests.utils import read_fixture
 from ymir.utils import parsing
 
-FIXTURE_DIR = './tests/fixtures/'
 
 EXPECTED_MONTH_LIST = [
     {'created': '2018-11-11T11:52:44+09:00',
@@ -32,17 +32,6 @@ EXPECTED_MONTH_LIST = [
 class TestYmirParsingMonth(unittest.TestCase):
     """Test the parsing rules for monthly index."""
 
-    def read_fixture(self, fixture_file):
-        """Read the fixture for tests."""
-        fixture_path = os.path.abspath(os.path.join(FIXTURE_DIR, fixture_file))
-        return parsing.parse_html_post(fixture_path)
-
-    def make_xml(self, text):
-        """Convert a string as an etree Element."""
-        parser = etree.XMLParser(remove_blank_text=True)
-        xml_fragment = etree.parse(BytesIO(text), parser)
-        return xml_fragment.getroot()
-
     def setUp(self):
         """Set up the tests."""
         self.maxDiff = None
@@ -54,7 +43,7 @@ class TestYmirParsingMonth(unittest.TestCase):
 
     def test_get_title(self):
         """Test the extraction of title."""
-        doc = self.read_fixture('month-index.html')
+        doc = read_fixture('month-index.html')
         actual = parsing.get_title(doc)
         expected = 'Archives novembre 2018'
         self.assertEqual(expected, actual)
@@ -62,7 +51,7 @@ class TestYmirParsingMonth(unittest.TestCase):
 
     def test_extract_month_list(self):
         """Extract the html fragment from monthly index."""
-        doc = self.read_fixture('month-index-simple.html')
+        doc = read_fixture('month-index-simple.html')
         content = parsing.get_html_month_list(doc)
         self.assertEqual(len(content), 2)
         actual = ''.join([etree.tostring(item, encoding='unicode')

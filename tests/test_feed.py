@@ -12,23 +12,13 @@ import unittest
 from lxml import etree
 import pytest
 
+from tests.utils import make_xml
 from ymir.utils import feed
 
-FIXTURE_DIR = './tests/fixtures/'
+
 
 class TestFeed(unittest.TestCase):
     """Test the main code."""
-
-    def read_fixture(self, fixture_file):
-        """Read the fixture for tests."""
-        fixture_path = os.path.abspath(os.path.join(FIXTURE_DIR, fixture_file))
-        return parsing.parse_html_post(fixture_path)
-
-    def make_xml(self, text):
-        """Convert a string as an etree Element."""
-        parser = etree.XMLParser(remove_blank_text=True)
-        xml_fragment = etree.parse(BytesIO(text), parser)
-        return xml_fragment.getroot()
 
     def setUp(self):
         """Set up the tests."""
@@ -48,8 +38,8 @@ class TestFeed(unittest.TestCase):
             'title': 'title',
             'created': 'date',
             'modified': 'date',
-            'content': self.make_xml(b'<article>content</article>')}
-        expected = self.make_xml(
+            'content': make_xml(b'<article>content</article>')}
+        expected = make_xml(
             b'<entry xmlns="http://www.w3.org/2005/Atom">'
             b'<id>example.org</id><link rel="alternate" type="text/html" '
             b'href="http://example.org/somewhere"/><title>title</title>'

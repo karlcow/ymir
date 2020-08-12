@@ -12,9 +12,8 @@ import unittest
 
 from lxml import etree
 
+from tests.utils import FIXTURE_DIR
 from ymir.utils import helper
-
-FIXTURE_DIR = './tests/fixtures/'
 
 
 class TestYmirHelper(unittest.TestCase):
