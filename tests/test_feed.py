@@ -16,7 +16,6 @@ from tests.utils import make_xml
 from ymir.utils import feed
 
 
-
 class TestFeed(unittest.TestCase):
     """Test the main code."""
 
@@ -28,7 +27,6 @@ class TestFeed(unittest.TestCase):
     def tearDown(self):
         """Tear down the tests."""
         pass
-
 
     def test_makefeedentry(self):
         """Creating feed entry"""
