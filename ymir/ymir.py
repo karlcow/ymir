@@ -12,11 +12,11 @@ import argparse
 import configparser
 from dataclasses import dataclass
 import datetime
+from io import StringIO
 import logging
 import os
 import shutil
 import string
-from io import StringIO
 import sys
 
 from lxml import etree
@@ -24,11 +24,11 @@ from lxml.etree import Element
 from lxml.etree import SubElement
 import lxml.html
 
-from ymir.utils import helper
-from ymir.utils import parsing
 from ymir.utils import feed
+from ymir.utils import helper
+from ymir.utils import indexes
+from ymir.utils import parsing
 
-# from tracer import show_guts
 
 # CONFIG SITE
 config = configparser.ConfigParser()
@@ -244,7 +244,7 @@ def main():
     # Create the monthly index if it doesn't exist yet
     # Happen once a month
     if not os.path.isfile(monthindexpath):
-        createmonthlyindex(indexmarkup, monthindexpath)
+        indexes.create_monthly_index(indexmarkup, monthindexpath, date_now)
     else:
         # TOFIX: updating the monthly index
         # UPDATE THE MONTHLY INDEX
@@ -252,7 +252,7 @@ def main():
             print('WE should write to the index')
             print(indexmarkup)
         else:
-            print('TESTING - This would be written:')
+            print('TODO: Fix the update_monthly_index: update_monthly_index')
             print(('-' * 80))
             print(indexmarkup)
 

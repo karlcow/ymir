@@ -14,69 +14,93 @@ import os
 import string
 import sys
 
-import lxml
+import lxml.html
 from lxml import etree
 
-from . import helper
+from ymir.utils import helper
+from ymir.ymir import createindexmarkup
 
+
+ROOT = '/Users/karl/Sites/la-grange.net'
 CODEPATH = os.path.dirname(sys.argv[0])
 TEMPLATEDIR = CODEPATH + "/../templates/"
 DATENOW = datetime.datetime.today()
 
 
-def createmonthlyindex(indexmarkup, monthindexpath):
+def create_monthly_index(entry_index, month_index_path, date_obj):
     """Create a monthly index when it doesn't exist."""
-    # Code ici pour lire un fichier avec des variables
-    # substituer les variables par les valeurs du mois
-    # sauver le fichier au bon endroit
     msg = "Do not forget to update /map with your tiny hands"
     logging.info("%s" % (msg))
+    # Generate the html
+    month_markup = month_index(entry_index, date_obj)
+    # Save the file
+    with open(month_index_path, 'w') as month_index:
+        month_index.write(month_markup)
 
-    with open(TEMPLATEDIR + 'index-mois.html', 'r') as source:
+
+def month_index(entry_index, date_obj):
+    """Generate the markup for the month index."""
+    # TODO: refactor the templating parts
+    template_path = f'{ROOT}/2019/12/04/month_index_tmpl.html'
+    with open(template_path, 'r') as source:
         t = string.Template(source.read())
-        datestring = helper.convert_date(DATENOW, 'iso')
-        datehumain = helper.convert_date(DATENOW, 'humain')
+        datestring = helper.convert_date(date_obj, 'iso')
+        datehumain = helper.convert_date(date_obj, 'humain')
         # to get month, we split in 3 the human date and take the second
         # argument
         datemois = datehumain.split(' ')[1]
-        indexli = etree.tostring(
-            indexmarkup, pretty_print=True, encoding='utf-8')
-        result = t.substitute(isodateshort=datestring,
-                              monthname=datemois,
-                              year=datestring[:4],
-                              humandate=datehumain,
-                              firstentry=indexli)
-        # need to write it on the filesystem.
-    with open(monthindexpath, 'w') as monthindex:
-        monthindex.write(result)
+        tmpl_data = {
+            'isodateshort': datestring,
+            'month': datemois,
+            'year': datestring[:4],
+            'humandate': datehumain,
+            'firstentry': entry_index
+        }
+        print(tmpl_data)
+        month_markup = t.substitute(tmpl_data)
+    return month_markup
 
 
-def updatemonthlyindex(indexmarkup, monthindexpath):
-    """Update the HTML Annual index with the feedendry."""
-    if os.path.isfile(monthindexpath):
-        monthlyindex = lxml.html.parse(monthindexpath).getroot()
-        logging.info("Monthly Index exists")
+def update_monthly_index(entry_index, month_index_path):
+    """Update the HTML Annual index with the feedendry.
+
+    entry_index: str
+        <li>etc…</li>
+    month_index_path: str
+        /2020/08/01/something.html
+    """
+    try:
+        parsed_month = lxml.html.parse(month_index_path)
+    except OSError as err:
+        logging.ERROR(f"Monthly Index not found: {err}")
     else:
-        logging.warn("Monthly index doesn’t exist. TOFIX")
-        createmonthlyindex(monthindexpath)
-    # grab the list of entry
+        month_index = parsed_month.getroot()
+    entry_index_xml = helper.make_xml(entry_index)
+    # Search path
     findentrylist = etree.ETXPath("//section[@id='month-index']/ul/li")
-    entries = findentrylist(monthlyindex)
-    find_href = etree.ETXPath("a/@href")
-    find_created = etree.ETXPath("time/@datetime")
-    # find_title = etree.ETXPath("a/text()")
-    href_ref = find_href(indexmarkup)[0]
-    created_ref = find_created(indexmarkup)[0]
-    # title_ref = find_title(indexmarkup)[0]
+    # Extract data
+    entries_xml = findentrylist(month_index)
+    entries = [to_entry_dict(entry_index_xml)
+               for entry_index_xml in entries_xml]
+    # TODO: Convert to an html template.
+    # TODO: Check if the entry already exist
+    # TODO: Sort list based on date.
+    print(entries)
+    return entries
 
-    for entry in entries:
-        href_entry = find_href(entry)[0]
-        created_entry = find_created(entry)[0]
-        print(("ENTRY: ", created_entry, " TO ", created_ref))
-        if href_entry == href_ref:
-            print(('same uri', href_entry))
-            # we check the date
-            # we check the title
-            # if changed replace
-        else:
-            pass
+
+def to_entry_dict(entry_index_xml):
+    """Convert an XML entry index into a dictionary."""
+    # Search paths
+    find_href = etree.ETXPath("a/@href")
+    find_short_date = etree.ETXPath("time/text()")
+    find_created = etree.ETXPath("time/@datetime")
+    find_title = etree.ETXPath("a/text()")
+    # extract data
+    entry_index = {
+        'created': find_created(entry_index_xml)[0],
+        'iso_short_date': find_short_date(entry_index_xml)[0],
+        'path': find_href(entry_index_xml)[0],
+        'title': find_title(entry_index_xml)[0],
+    }
+    return entry_index
