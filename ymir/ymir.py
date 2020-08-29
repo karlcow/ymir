@@ -240,28 +240,41 @@ def main():
     # INDEX MARKUP
     new_entry_html = createindexmarkup(postpath[:-5], created, title)
 
-    # MONTHLY INDEX CREATION
-    # Create the monthly index if it doesn't exist yet
-    # Happen once a month
     if not os.path.isfile(month_index_path):
-        indexes.create_monthly_index(
+        # MONTHLY INDEX CREATION
+        # Create the monthly index if it doesn't exist yet
+        # Happen once a month
+        month_markup = indexes.create_monthly_index(
             new_entry_html,
             month_index_path,
             date_now)
+        # Save the file
+        with open(month_index_path, 'w') as month_index:
+            month_index.write(month_markup)
     else:
-        # TOFIX: updating the monthly index
         # UPDATE THE MONTHLY INDEX
+        # Happen every time we publish
+        entries = indexes.update_monthly_index(new_entry_html, month_index_path)
+        entries_html = '\n'.join(
+            [createindexmarkup(
+                entry['path'], entry['created'], entry['title']
+                )
+                for entry in entries]
+        )
+        # TODO: Do not overwrite the creation date
+        month_markup = indexes.create_monthly_index(
+            entries_html,
+            month_index_path,
+            date_now)
         if not dryrun:
-            print('WE should write to the index')
-            print(new_entry_html)
-            # Return a dictionary of updated entries
-            entries = indexes.update_monthly_index(new_entry_html, month_index_path)
-            # TODO: Save as html
+            # Save the file
+            with open(month_index_path, 'w') as month_index:
+                month_index.write(month_markup)
+            print('month index updated')
+            print('Still need to update the annual index and homepage')
         else:
-            print('TODO: Fix the update_monthly_index: update_monthly_index')
-            print(('-' * 80))
+            print(month_markup)
             print(new_entry_html)
-
     # FEED ENTRY MARKUP
     # We compute the tagid using the creation date of the post
     created_dt = helper.rfc3339_to_datetime(created)

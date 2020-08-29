@@ -33,9 +33,7 @@ def create_monthly_index(entry_index, month_index_path, date_obj):
     logging.info("%s" % (msg))
     # Generate the html
     month_markup = month_index(entry_index, date_obj)
-    # Save the file
-    with open(month_index_path, 'w') as month_index:
-        month_index.write(month_markup)
+    return month_markup
 
 
 def month_index(entry_index, date_obj):
@@ -56,7 +54,6 @@ def month_index(entry_index, date_obj):
             'humandate': datehumain,
             'firstentry': entry_index
         }
-        print(tmpl_data)
         month_markup = t.substitute(tmpl_data)
     return month_markup
 
