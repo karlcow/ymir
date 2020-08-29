@@ -75,10 +75,3 @@ def get_content(doc):
     except IndexError as e:
         logging.info('No header inside article: {e}'.format(e=e))
     return content
-
-
-def get_html_month_list(doc):
-    """Return a posts list of HTML Element from a month index."""
-    search_path = "//{%s}section[@id='month-index']/{%s}ul/{%s}li"
-    findcontent = etree.ETXPath(search_path % (HTMLNS, HTMLNS, HTMLNS))
-    return findcontent(doc)

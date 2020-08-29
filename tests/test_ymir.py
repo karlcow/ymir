@@ -11,25 +11,13 @@ from io import BytesIO
 
 import pytest
 
+from tests.utils import FIXTURE_DIR
 from ymir.ymir import createindexmarkup
 from ymir.ymir import last_posts
-
-FIXTURE_DIR = './tests/fixtures/'
 
 
 class TestYmir(unittest.TestCase):
     """Test the main code."""
-
-    def read_fixture(self, fixture_file):
-        """Read the fixture for tests."""
-        fixture_path = os.path.abspath(os.path.join(FIXTURE_DIR, fixture_file))
-        return parsing.parse_html_post(fixture_path)
-
-    def make_xml(self, text):
-        """Convert a string as an etree Element."""
-        parser = etree.XMLParser(remove_blank_text=True)
-        xml_fragment = etree.parse(BytesIO(text), parser)
-        return xml_fragment.getroot()
 
     def setUp(self):
         """Set up the tests."""

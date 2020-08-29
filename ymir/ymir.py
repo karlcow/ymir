@@ -12,11 +12,11 @@ import argparse
 import configparser
 from dataclasses import dataclass
 import datetime
+from io import StringIO
 import logging
 import os
 import shutil
 import string
-from io import StringIO
 import sys
 
 from lxml import etree
@@ -24,11 +24,11 @@ from lxml.etree import Element
 from lxml.etree import SubElement
 import lxml.html
 
-from ymir.utils import helper
-from ymir.utils import parsing
 from ymir.utils import feed
+from ymir.utils import helper
+from ymir.utils import indexes
+from ymir.utils import parsing
 
-# from tracer import show_guts
 
 # CONFIG SITE
 config = configparser.ConfigParser()
@@ -209,8 +209,8 @@ def main():
     # Monthly index
     monthabspath = os.path.dirname(os.path.dirname(abspathpost))
     logging.info('month absolute path: {path}'.format(path=monthabspath))
-    monthindexpath = monthabspath + "/index.html"
-    logging.info('month index path: {path}'.format(path=monthindexpath))
+    month_index_path = monthabspath + "/index.html"
+    logging.info('month index path: {path}'.format(path=month_index_path))
     # *** END PATH CONFIGURATIONS ***
 
     # *** BACKUPS ***
@@ -238,24 +238,43 @@ def main():
     date_now = helper.rfc3339_to_datetime(modified)
 
     # INDEX MARKUP
-    indexmarkup = createindexmarkup(postpath[:-5], created, title)
+    new_entry_html = createindexmarkup(postpath[:-5], created, title)
 
-    # MONTHLY INDEX CREATION
-    # Create the monthly index if it doesn't exist yet
-    # Happen once a month
-    if not os.path.isfile(monthindexpath):
-        createmonthlyindex(indexmarkup, monthindexpath)
+    if not os.path.isfile(month_index_path):
+        # MONTHLY INDEX CREATION
+        # Create the monthly index if it doesn't exist yet
+        # Happen once a month
+        month_markup = indexes.create_monthly_index(
+            new_entry_html,
+            month_index_path,
+            date_now)
+        # Save the file
+        with open(month_index_path, 'w') as month_index:
+            month_index.write(month_markup)
     else:
-        # TOFIX: updating the monthly index
         # UPDATE THE MONTHLY INDEX
+        # Happen every time we publish
+        entries = indexes.update_monthly_index(new_entry_html, month_index_path)
+        entries_html = '\n'.join(
+            [createindexmarkup(
+                entry['path'], entry['created'], entry['title']
+                )
+                for entry in entries]
+        )
+        # TODO: Do not overwrite the creation date
+        month_markup = indexes.create_monthly_index(
+            entries_html,
+            month_index_path,
+            date_now)
         if not dryrun:
-            print('WE should write to the index')
-            print(indexmarkup)
+            # Save the file
+            with open(month_index_path, 'w') as month_index:
+                month_index.write(month_markup)
+            print('month index updated')
+            print('Still need to update the annual index and homepage')
         else:
-            print('TESTING - This would be written:')
-            print(('-' * 80))
-            print(indexmarkup)
-
+            print(month_markup)
+            print(new_entry_html)
     # FEED ENTRY MARKUP
     # We compute the tagid using the creation date of the post
     created_dt = helper.rfc3339_to_datetime(created)

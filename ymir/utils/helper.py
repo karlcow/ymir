@@ -8,6 +8,7 @@ see LICENSE.TXT
 """
 
 import datetime
+from io import BytesIO
 import locale
 import logging
 import os
@@ -137,3 +138,9 @@ def find_root(directory, token):
         newpath = os.path.realpath(directory + '/../')
         directory = find_root(newpath, token)
     return directory
+
+
+def make_xml(text):
+    """Convert a string as an etree Element."""
+    parser = etree.XMLParser(remove_blank_text=True)
+    return etree.fromstring(text, parser)
