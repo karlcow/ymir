@@ -61,10 +61,10 @@ def month_index(entry_index, date_obj):
     return month_markup
 
 
-def update_monthly_index(entry_index, month_index_path):
+def update_monthly_index(new_entry_html, month_index_path):
     """Update the HTML Annual index with the feedendry.
 
-    entry_index: str
+    new_entry: str
         <li>etc…</li>
     month_index_path: str
         /2020/08/01/something.html
@@ -75,17 +75,36 @@ def update_monthly_index(entry_index, month_index_path):
         logging.ERROR(f"Monthly Index not found: {err}")
     else:
         month_index = parsed_month.getroot()
-    entry_index_xml = helper.make_xml(entry_index)
+    # Get a list of dictionaries for entries
+    entries = entries_as_dict(month_index)
+    # Convert html entry to dict
+    new_entry_xml = helper.make_xml(new_entry_html)
+    new_entry = to_entry_dict(new_entry_xml)
+    # Add the new entry to the list of entries
+    update_entries(entries, new_entry)
+    return entries
+
+
+def update_entries(entries, new_entry):
+    """Adds the new_entry to the entries.
+
+    1. If new_entry URL is already in there, do not add to the list.
+    2. It sorts the list according to the created date.
+    """
+    if not any(d['created'] == new_entry['created'] for d in entries):
+        entries.append(new_entry)
+    entries = sorted(entries, key=lambda k: k['created'])
+    return entries
+
+
+def entries_as_dict(month_index):
+    """Convert index xml list to list of dictionaries."""
     # Search path
     findentrylist = etree.ETXPath("//section[@id='month-index']/ul/li")
     # Extract data
     entries_xml = findentrylist(month_index)
     entries = [to_entry_dict(entry_index_xml)
                for entry_index_xml in entries_xml]
-    # TODO: Convert to an html template.
-    # TODO: Check if the entry already exist
-    # TODO: Sort list based on date.
-    print(entries)
     return entries
 
 

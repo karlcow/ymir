@@ -209,8 +209,8 @@ def main():
     # Monthly index
     monthabspath = os.path.dirname(os.path.dirname(abspathpost))
     logging.info('month absolute path: {path}'.format(path=monthabspath))
-    monthindexpath = monthabspath + "/index.html"
-    logging.info('month index path: {path}'.format(path=monthindexpath))
+    month_index_path = monthabspath + "/index.html"
+    logging.info('month index path: {path}'.format(path=month_index_path))
     # *** END PATH CONFIGURATIONS ***
 
     # *** BACKUPS ***
@@ -238,23 +238,29 @@ def main():
     date_now = helper.rfc3339_to_datetime(modified)
 
     # INDEX MARKUP
-    indexmarkup = createindexmarkup(postpath[:-5], created, title)
+    new_entry_html = createindexmarkup(postpath[:-5], created, title)
 
     # MONTHLY INDEX CREATION
     # Create the monthly index if it doesn't exist yet
     # Happen once a month
-    if not os.path.isfile(monthindexpath):
-        indexes.create_monthly_index(indexmarkup, monthindexpath, date_now)
+    if not os.path.isfile(month_index_path):
+        indexes.create_monthly_index(
+            new_entry_html,
+            month_index_path,
+            date_now)
     else:
         # TOFIX: updating the monthly index
         # UPDATE THE MONTHLY INDEX
         if not dryrun:
             print('WE should write to the index')
-            print(indexmarkup)
+            print(new_entry_html)
+            # Return a dictionary of updated entries
+            entries = indexes.update_monthly_index(new_entry_html, month_index_path)
+            # TODO: Save as html
         else:
             print('TODO: Fix the update_monthly_index: update_monthly_index')
             print(('-' * 80))
-            print(indexmarkup)
+            print(new_entry_html)
 
     # FEED ENTRY MARKUP
     # We compute the tagid using the creation date of the post
