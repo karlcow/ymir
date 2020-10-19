@@ -15,3 +15,10 @@ def test_parsing_meta():
                          'title': 'Titre',
                          'url': 'somewhere'}
     assert post_text == 'Some text'
+
+
+def test_missing_meta():
+    """Exit gracefully on missing meta."""
+    doc = read_text_fixture('draft-missing-meta.md')
+    with pytest.raises(ValueError, match="ERROR: Some meta are missing"):
+        make_post.parse(doc)
