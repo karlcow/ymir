@@ -12,7 +12,7 @@ from PIL import Image
 
 ROOT = '/Users/karl/Sites/la-grange.net'
 INDENTATION = re.compile(r'\n\s{2,}')
-META = re.compile(r'^(\w+):\s*(.+?)\n')
+META = re.compile(r'^(\w+):([^\n]*)\n')
 PATH = re.compile(r'^.*(\d{4})/(\d{2})/(\d{2})/.*')
 TEMPLATE = """date: {date}
 prev: {prev}
@@ -68,10 +68,12 @@ def parse(text):
         key = m.group(1)
         value = m.group(2)
         value = INDENTATION.sub('\n', value.strip())
+        if not value:
+            sys.exit("ERROR: Some meta are missing")
         rv[key] = value
         text = text[len(m.group(0)):]
         m = META.match(text)
-    return rv, text
+    return rv, text.lstrip()
 
 
 def get_draft(entry_path):
@@ -101,9 +103,6 @@ def main():
 
     p = parser.parse_args()
     entry_path = p.file_path
-    # explore_path = ROOT + '/2019/*/*/*.md'
-    # paths = glob(explore_path)
-    # paths.sort()
     template_path = f'{ROOT}/2019/12/04/article_tmpl.html'
     with open(template_path) as tmpfile:
         blog_tmp = tmpfile.read()
