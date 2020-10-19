@@ -27,7 +27,8 @@ TEMPLATEDIR = CODEPATH + "/../templates/"
 DATENOW = datetime.datetime.today()
 
 
-def create_monthly_index(entry_index, month_index_path, date_obj):
+def create_monthly_index(entry_index, month_index_path, date_obj,
+                         first_time=False):
     """Create a monthly index when it doesn't exist."""
     msg = "Do not forget to update /map with your tiny hands"
     logging.info("%s" % (msg))

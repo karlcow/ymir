@@ -247,7 +247,8 @@ def main():
         month_markup = indexes.create_monthly_index(
             new_entry_html,
             month_index_path,
-            date_now)
+            date_now,
+            first_time=True)
         # Save the file
         with open(month_index_path, 'w') as month_index:
             month_index.write(month_markup)
