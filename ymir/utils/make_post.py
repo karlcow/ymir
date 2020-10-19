@@ -71,7 +71,7 @@ def parse(text):
         rv[key] = value
         text = text[len(m.group(0)):]
         m = META.match(text)
-    return rv, text
+    return rv, text.lstrip()
 
 
 def get_draft(entry_path):
