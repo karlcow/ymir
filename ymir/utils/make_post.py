@@ -69,7 +69,7 @@ def parse(text):
         value = m.group(2)
         value = INDENTATION.sub('\n', value.strip())
         if not value:
-            raise ValueError("ERROR: Some meta are missing")
+            sys.exit("ERROR: Some meta are missing")
         rv[key] = value
         text = text[len(m.group(0)):]
         m = META.match(text)

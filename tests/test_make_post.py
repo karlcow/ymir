@@ -20,5 +20,5 @@ def test_parsing_meta():
 def test_missing_meta():
     """Exit gracefully on missing meta."""
     doc = read_text_fixture('draft-missing-meta.md')
-    with pytest.raises(ValueError, match="ERROR: Some meta are missing"):
+    with pytest.raises(SystemExit, match="ERROR: Some meta are missing"):
         make_post.parse(doc)
