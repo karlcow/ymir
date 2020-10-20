@@ -41,8 +41,9 @@ def test_entry_index_to_dict():
     assert indexes.to_entry_dict(entry_index_xml) == expected
 
 
-def test_entries_as_dict():
+def test_entries_as_dict_month():
     """Extract the entries from a markup file."""
+    # For month index
     index_path = get_fixture_path('month-index.html')
     month_xpath = "//section[@id='month-index']/ul/li"
     index_markup = parsing.parse_xhtml_post(index_path)
@@ -50,7 +51,18 @@ def test_entries_as_dict():
     assert expected == indexes.entries_as_dict(index_markup, month_xpath)
 
 
+def test_entries_as_dict_year():
+    """Extract the entries from a markup file."""
+    # For annual index
+    year_index_path = get_fixture_path('annual-index.html')
+    year_xpath = "//section[@class='month index y2020 m10']/ul/li"
+    year_index_markup = parsing.parse_xhtml_post(year_index_path)
+    expected = [{'created': '2020-10-01T23:59:59+09:00', 'iso_short_date': '2020-10-01', 'path': '/2020/10/01/etoiles', 'title': 'sous les étoiles'}, {'created': '2020-10-02T23:59:59+09:00', 'iso_short_date': '2020-10-02', 'path': '/2020/10/02/arbres', 'title': 'arbres de kugenuma'}, {'created': '2020-10-03T23:59:59+09:00', 'iso_short_date': '2020-10-03', 'path': '/2020/10/03/jardin', 'title': 'entretiens de jardin'}, {'created': '2020-10-04T23:59:59+09:00', 'iso_short_date': '2020-10-04', 'path': '/2020/10/04/kandisky', 'title': 'chenille Kandinsky'}, {'created': '2020-10-05T23:59:59+09:00', 'iso_short_date': '2020-10-05', 'path': '/2020/10/05/humain', 'title': "chasser l'humain"}, {'created': '2020-10-06T23:59:59+09:00', 'iso_short_date': '2020-10-06', 'path': '/2020/10/06/peau', 'title': 'seconde peau'}, {'created': '2020-10-07T23:59:59+09:00', 'iso_short_date': '2020-10-07', 'path': '/2020/10/07/abysses', 'title': 'marcher les abysses'}, {'created': '2020-10-08T23:59:59+09:00', 'iso_short_date': '2020-10-08', 'path': '/2020/10/08/asperite', 'title': 'aspérités'}, {'created': '2020-10-09T23:59:59+09:00', 'iso_short_date': '2020-10-09', 'path': '/2020/10/09/neuf', 'title': 'neuf'}, {'created': '2020-10-10T23:59:59+09:00', 'iso_short_date': '2020-10-10', 'path': '/2020/10/10/entre-deux', 'title': 'entre deux'}, {'created': '2020-10-11T23:59:59+09:00', 'iso_short_date': '2020-10-11', 'path': '/2020/10/11/breche', 'title': 'brèche'}, {'created': '2020-10-12T23:59:59+09:00', 'iso_short_date': '2020-10-12', 'path': '/2020/10/12/extase', 'title': 'extase du doute'}, {'created': '2020-10-13T23:59:59+09:00', 'iso_short_date': '2020-10-13', 'path': '/2020/10/13/amer', 'title': 'amer'}, {'created': '2020-10-14T23:59:59+09:00', 'iso_short_date': '2020-10-14', 'path': '/2020/10/14/kaki', 'title': 'kaki'}, {'created': '2020-10-15T23:59:59+09:00', 'iso_short_date': '2020-10-15', 'path': '/2020/10/15/cote', 'title': 'quatre côtés'}, {'created': '2020-10-16T23:59:59+09:00', 'iso_short_date': '2020-10-16', 'path': '/2020/10/16/mains-sales', 'title': 'mains sales'}, {'created': '2020-10-17T23:59:59+09:00', 'iso_short_date': '2020-10-17', 'path': '/2020/10/17/reflet', 'title': 'reflet'}, {'created': '2020-10-18T23:59:59+09:00', 'iso_short_date': '2020-10-18', 'path': '/2020/10/18/tofu', 'title': 'lieu du tofu'}, {'created': '2020-10-19T23:59:59+09:00', 'iso_short_date': '2020-10-19', 'path': '/2020/10/19/fuji', 'title': 'Fuji'}]  # noqa
+    print(indexes.entries_as_dict(year_index_markup, year_xpath))
+    assert expected == indexes.entries_as_dict(year_index_markup, year_xpath)
+
+
 def test_create_month_xpath_in_annual_index():
     """Given a month, create the relevant xpath to extract the month."""
-    expected = "//section[@class='m10' AND @class='month']/ul/li"
-    assert expected == indexes.create_month_xpath(10)
+    expected = "//section[@class='month index y2020 m10']/ul/li"
+    assert expected == indexes.create_month_xpath(2020, 10)

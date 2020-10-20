@@ -120,7 +120,7 @@ def to_entry_dict(entry_index_xml):
     return entry_index
 
 
-def create_month_xpath(month_number):
+def create_month_xpath(year, month):
     """
     Creates an xpath for a certain month in an annual index.
 
@@ -128,5 +128,8 @@ def create_month_xpath(month_number):
     a file at /2020/index.html for the year 2020
     in a section with a class such as
         <section class="month index y2020 m10">
+
+    The support for XPath in xml.etree is really minimal
+    and we are forced to put all attributes values.
     """
-    return f"//section[@class='m{month_number}' AND @class='month']/ul/li"
+    return f"//section[@class='month index y{year} m{month}']/ul/li"
