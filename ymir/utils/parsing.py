@@ -12,6 +12,7 @@ import configparser
 import logging
 import sys
 
+import lxml
 from lxml import etree
 from lxml.html import html5parser
 
@@ -27,6 +28,15 @@ def parse_html_post(blogpost_path):
     doc = html5parser.parse(blogpost_path).getroot()
     logging.info("HTML document parsed")
     return doc
+
+
+def parse_xhtml_post(file_path):
+    try:
+        parsed_month = lxml.html.parse(file_path)
+    except OSError as err:
+        logging.ERROR(f"Monthly Index not found: {err}")
+    else:
+        return parsed_month.getroot()
 
 
 def get_title(doc):
