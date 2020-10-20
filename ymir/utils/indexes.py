@@ -118,3 +118,15 @@ def to_entry_dict(entry_index_xml):
         'title': find_title(entry_index_xml)[0],
     }
     return entry_index
+
+
+def create_month_xpath(month_number):
+    """
+    Creates an xpath for a certain month in an annual index.
+
+    We want to extract the information which is inside a list of
+    a file at /2020/index.html for the year 2020
+    in a section with a class such as
+        <section class="month index y2020 m10">
+    """
+    return f"//section[@class='m{month_number}' AND @class='month']/ul/li"

@@ -48,3 +48,9 @@ def test_entries_as_dict():
     index_markup = parsing.parse_xhtml_post(index_path)
     expected = [{'created': '2018-11-11T11:52:44+09:00', 'iso_short_date': '2018-11-11', 'path': '/2018/11/11/tancarville', 'title': 'Le séchoir Tancarville'}, {'created': '2018-11-11T16:18:22+09:00', 'iso_short_date': '2018-11-11', 'path': '/2018/11/11/archive-perenne', 'title': "Fragilité économique de l'archive pérenne"}, {'created': '2018-11-12T16:57:27+09:00', 'iso_short_date': '2018-11-12', 'path': '/2018/11/12/automne-enfoui', 'title': 'Automne enfoui'}]  # noqa
     assert expected == indexes.entries_as_dict(index_markup, month_xpath)
+
+
+def test_create_month_xpath_in_annual_index():
+    """Given a month, create the relevant xpath to extract the month."""
+    expected = "//section[@class='m10' AND @class='month']/ul/li"
+    assert expected == indexes.create_month_xpath(10)
