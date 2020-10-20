@@ -18,6 +18,7 @@ import lxml.html
 from lxml import etree
 
 from ymir.utils import helper
+from ymir.utils import parsing
 from ymir.ymir import createindexmarkup
 
 
@@ -67,14 +68,10 @@ def update_monthly_index(new_entry_html, month_index_path):
     month_index_path: str
         /2020/08/01/something.html
     """
-    try:
-        parsed_month = lxml.html.parse(month_index_path)
-    except OSError as err:
-        logging.ERROR(f"Monthly Index not found: {err}")
-    else:
-        month_index = parsed_month.getroot()
+    month_index = parsing.parse_xhtml_post(month_index_path)
     # Get a list of dictionaries for entries
-    entries = entries_as_dict(month_index)
+    month_xpath = "//section[@id='month-index']/ul/li"
+    entries = entries_as_dict(month_index, month_xpath)
     # Convert html entry to dict
     new_entry_xml = helper.make_xml(new_entry_html)
     new_entry = to_entry_dict(new_entry_xml)
@@ -95,12 +92,12 @@ def update_entries(entries, new_entry):
     return entries
 
 
-def entries_as_dict(month_index):
+def entries_as_dict(document, xpath):
     """Convert index xml list to list of dictionaries."""
     # Search path
-    findentrylist = etree.ETXPath("//section[@id='month-index']/ul/li")
+    findentrylist = etree.ETXPath(xpath)
     # Extract data
-    entries_xml = findentrylist(month_index)
+    entries_xml = findentrylist(document)
     entries = [to_entry_dict(entry_index_xml)
                for entry_index_xml in entries_xml]
     return entries
