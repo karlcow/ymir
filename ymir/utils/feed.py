@@ -90,7 +90,7 @@ def makefeedentry(feedentry_data):
     # Change the image links to absolute links
     # This will break one day. This is for Anthony Ricaud.
     normalized_entry = entry_string.replace(
-        '<img src="/', '<img src="http://www.la-grange.net/')
+        '<img src="/', '<img src="https://www.la-grange.net/')
     # Convert as an elementTree
     entry = etree.parse(StringIO(normalized_entry))
     logging.info("makefeedentry: new entry created")
