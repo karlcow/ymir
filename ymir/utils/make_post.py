@@ -92,8 +92,16 @@ def get_draft(entry_path):
     else:
         return parse(text)
 
+def add_id(html_text):
+    """Post process to add certain ids."""
+    # Add id to links section
+    html_text = html_text.replace(
+        '<h2>sur le bord du chemin</h2>',
+        '<h2 id="links">sur le bord du chemin</h2>')
+    return html_text
 
 def main():
+    """Main workflow."""
     locale.setlocale(locale.LC_ALL, 'fr_FR')
     import argparse
     from pathlib import Path
@@ -107,7 +115,7 @@ def main():
     with open(template_path) as tmpfile:
         blog_tmp = tmpfile.read()
     # Read the draft post
-    meta, entry_text = get_draft(entry_path)
+    meta, markdown_text = get_draft(entry_path)
     pprint(meta)
     prev_url = meta['prev']
     # Read the previous blog entry
@@ -130,6 +138,9 @@ def main():
     renderer = GrangeRenderer()
     markdown = mistune.create_markdown(
         renderer=renderer, plugins=['strikethrough'])
+    html_text = markdown(markdown_text)
+    # Post processing of markdown text
+    html_text = add_id(html_text)
     # metadata
     metadata = {
         'title': meta['title'],
@@ -142,7 +153,7 @@ def main():
         'updated': meta['date'],
         'prev_url': meta['prev'],
         'prev_title': prev_title,
-        'post_text': markdown(entry_text),
+        'post_text': html_text,
         'day_path': day_path,
         'url': meta['url'],
         'stylepath': meta['style'],
