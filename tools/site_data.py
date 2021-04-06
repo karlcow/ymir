@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-Parses and updates indexes files.
+Extract data from HTML files according to a "CSS schema".
 
-Created by Karl Dubost on 2020-10-31
+Created by Karl Dubost on 2021-03-21
 see LICENSE.TXT
 """
 
