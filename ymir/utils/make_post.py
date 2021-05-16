@@ -137,7 +137,7 @@ def main():
     # special rendering
     renderer = GrangeRenderer()
     markdown = mistune.create_markdown(
-        renderer=renderer, plugins=['strikethrough'])
+        renderer=renderer, plugins=['strikethrough'], escape=False)
     html_text = markdown(markdown_text)
     # Post processing of markdown text
     html_text = add_id(html_text)
