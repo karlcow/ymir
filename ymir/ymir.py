@@ -211,6 +211,12 @@ def main():
     logging.info('month absolute path: {path}'.format(path=monthabspath))
     month_index_path = monthabspath + "/index.html"
     logging.info('month index path: {path}'.format(path=month_index_path))
+    # Annual index
+    yearabspath = os.path.dirname(
+        os.path.dirname(os.path.dirname(abspathpost)))
+    logging.info('year absolute path: {path}'.format(path=yearabspath))
+    year_index_path = yearabspath + "/index.html"
+    logging.info('year index path: {path}'.format(path=year_index_path))
     # *** END PATH CONFIGURATIONS ***
 
     # *** BACKUPS ***
@@ -276,6 +282,9 @@ def main():
         else:
             print(month_markup)
             print(new_entry_html)
+
+    # ANNUAL INDEX MARKUP
+
     # FEED ENTRY MARKUP
     # We compute the tagid using the creation date of the post
     created_dt = helper.rfc3339_to_datetime(created)

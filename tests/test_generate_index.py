@@ -39,4 +39,6 @@ def test_entry_index_to_dict():
     }
     assert indexes.to_entry_dict(entry_index_xml) == expected
 
-
+def text_update_yearly_index():
+    """Test that the yearly file is correctly updated."""
+    pass

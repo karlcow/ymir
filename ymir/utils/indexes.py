@@ -60,7 +60,7 @@ def month_index(entry_index, date_obj):
 
 
 def update_monthly_index(new_entry_html, month_index_path):
-    """Update the HTML Annual index with the feedendry.
+    """Update the HTML Monthly index with the feedendry.
 
     new_entry: str
         <li>etc…</li>
