@@ -1,6 +1,6 @@
 beautifulsoup4==4.9.0
 html5lib==1.0.1
-lxml==4.6.3
+lxml==4.6.5
 mistune==2.0.0rc1
-Pillow==8.3.2
+Pillow==9.0.1
 httpx==0.17.1
